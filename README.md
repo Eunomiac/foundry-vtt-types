@@ -13,97 +13,89 @@ TypeScript type definitions for [Foundry Virtual Tabletop](https://foundryvtt.co
 
 ## Supported Foundry VTT versions
 
-We aim to support the latest release of each Foundry VTT version (0.7, 0.8, 9, etc.), starting with 0.7.
+_(Will the types be backwards compatible, and if so, how far?)_
 
-At the moment, versions 0.7, 0.8, and 9 are fully supported with partial support for versions 10 and 11. Work on support for version 12 is currently underway. See the [open foundry V12 issues](https://github.com/League-of-Foundry-Developers/foundry-vtt-types/issues?q=is%3Aopen+is%3Aissue+label%3A%22foundry+V12%22).
-
-## V12 Installation
-
-Currently v12 is still in beta. There are known bugs, issues in the ergonomics, and major unfinished work in the current implementation. To get a direct line of communication about the current status of development as well as to help us understand what areas need to be prioritizated first, join the [League of Extraordinary FoundryVTT Developers Discord](https://discord.gg/73HTMuK7dT) or file an issue.
-
-The recommended way to install for v12 is this command:
-
-```sh
-npm add --include=dev github:League-of-Foundry-Developers/foundry-vtt-types#main
+These type definitions enable full TypeScript type checking for the Foundry API, which is a Very Good Thing. TypeScript offers several advantages over plain JavaScript, including static typing, enhanced tooling, and better support for modern programming practices. More to the point, it will help you spot errors earlier, make your code much easier to work with and navigate, and help make sure even complex refactors don't break everything.  This guide will walk you through setting up your Foundry project to use TypeScript with the `fvtt-types` type definitions.
+# Setting Up Your Foundry TypeScript Project
+This process can be broadly divided into two main steps:
+1. Preparing your project to use TypeScript.
+2. Configuring TypeScript to use the `fvtt-types` library of Foundry-specific type definitions.
+# Preparing Your Project
+## Installing the TypeScript Compiler
+TypeScript is a language designed for developers, meaning it must be compiled into plain JavaScript before Foundry VTT can execute it. To get started, you'll need to install the TypeScript compiler. The easiest way to do this is via [Node.js](https://nodejs.org/en/download/package-manager) and its package manager, `npm`. If you don’t already have Node.js installed, download and install it from the provided link. Then, open your terminal and run the following command:
+```bash
+npm install -g typescript
 ```
-
-Alternatively, if you're using yarn you'll need to use the command `yarn add --dev foundry-vtt-types@github:League-of-Foundry-Developers/foundry-vtt-types#main`.
-
-This will add the current commit on `main` as a dependency. Both npm and yarn's lockfile will store the commit you initially installed this command and so updates to your dependency will not happen automatically or even after a fresh install. To update you will need to be rerun the prior command periodically to update as improvements are added frequently.
-
-## Installation
-
-You can install historical versions of foundry-vtt-types from the [npm registry](https://npmjs.org/).
-
-In order to install the latest stable version (v9), run
-
-```sh
-npm install --save-dev @league-of-foundry-developers/foundry-vtt-types
+To confirm the installation, you can check the compiler version by running:
+```bash
+tsc --version
 ```
-
-In order to install a specific version run
-
-```sh
-npm install --save-dev @league-of-foundry-developers/foundry-vtt-types@<version>
+This should display the version number of TypeScript, indicating it has been installed globally.
+## Configuring TypeScript with `./tsconfig.json`
+Before using TypeScript in Foundry projects, you need to configure it properly. TypeScript’s settings are defined in a `tsconfig.json` file, which should be located at the root of your project directory. This file allows you to customize TypeScript’s behavior, specify which files to compile and which types to include, and set up various compiler options.
+To create a basic `tsconfig.json` file, navigate to your project's root directory in the terminal and run:
+```bash
+tsc --init
 ```
+This command generates a default `tsconfig.json` file with common configuration settings. Next, open `tsconfig.json` and update the following settings to ensure compatibility with the Foundry VTT API:
 
-For example, to install version `9.268.0`, run
+> (collapsible section containing explanations of each setting)
 
-```sh
-npm install --save-dev @league-of-foundry-developers/foundry-vtt-types@9.268.0
-```
+## `./@types/`: Ambient Type Declaration Files
+- description of the difference between ambient types and "normal" types
+- use of `declare global`
+- recommendation to create a `.d.ts` file to contain all configuration data for VFTT-Types
+- adding these type definitions to `tsconfig.json`
 
-You can then update foundry-vtt-types using the regular update mechanism for npm
-(see [npm update](https://docs.npmjs.com/cli/v7/commands/npm-update)).
+# Working with FVTT-Types
+## Installing FVTT-Types
+## Declaration Merging
+	very long article, needs some updating - https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/A-Quick-Guide-to-Declaration-Merging
+## InterfaceToObject
 
-## Versioning scheme
+# Configuring Your Documents
+## Configuring Document Subclasses
+### DocumentClassConfig
+## Configuring Document Schemas
+### DataModelConfig
+### SourceConfig & DataConfig
+#### Generic Types for Document Subclasses
+	class K4Actor<Type extends K4ActorType = K4ActorType> extends Actor {
+	  declare type: Type;
+	  declare system: K4Actor.System<Type>;
+## Configuring Document Flags
+### FlagConfig
+	too short article - https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/Flags
 
-The versions of the foundry-vtt-types correspond to the releases of Foundry VTT. The versioning scheme of Foundry VTT
-changed with version 9, so the versioning scheme for the foundry-vtt-types also changes with that version:
+# Configuring Your Settings
+## SettingsConfig
+	https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/Settings
 
-- For Foundry VTT version 0.7 and 0.8, the versioning scheme is
+# Hooks & Game Readiness
+## Foundry Initialization Hooks
+### AssumeHookRan
+## Defining Custom Hooks
 
-  ```text
-  0.<foundy-minor-version>.<foundry-patch-version>-<increment>
-  ```
+# Defining Your API
+## Exposing Functionality via `game.module`
+### ModuleConfig
+## Defining Required Modules
+### RequiredModules
 
-- For Foundry VTT version 9 and onwards, the versioning scheme is
+# Accessing Foundry's Built-In Libraries
+## `system.json`/`module.json` Configuration
+## Dynamic Imports
+### Example: GreenSock Animation Platform ("GSAP")
 
-  ```text
-  <foundry-version>.<foundry-build>.<increment>
-  ```
-
-  In both cases, `increment` is a number that increases with every individual release of the foundry-vtt-types for that
-  Foundry VTT release.
-
-## Usage
-
-Add foundry-vtt-types to your types section in your `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "types": ["@league-of-foundry-developers/foundry-vtt-types"],
-    "module": "node16",
-    "moduleResolution": "node16",
-    "esModuleInterop": true,
-    "strictNullChecks": true
-  }
-}
-```
-
-This will make the type definitions available globally in your project.
-
-Make sure you are using at least `"module": "node16"` and `"moduleResolution": "node16"`, too. It is required for some
-imports to be resolved correctly, such as `@league-of-foundry-developers/foundry-vtt-types/src/types/utils.mts`.
-
-Also make sure to set `"strictNullChecks": true` because otherwise, some conditional types used in the type definitions
-resolve incorrectly, and you will see a lot of errors. Alternatively, you can just set `"strict": true`, which
-implicitly sets `strictNullChecks`. This is actually what we **recommend**, but it's not required.
-
-You can find some information about how to actually work with the type definitions in the
-[Wiki](https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki). A good starting point is
-the [FAQ](https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/FAQ).
+# Popular Third-Party Modules
+## Modules with Available Type Support
+ "FVTT-Types includes full TypeScript definitions for several of the most popular modules used by system and module developers, including ..."
+ also: And then I'll add another line clarifying that this doesn't mean other modules aren't available, just that the type definitions aren't.  I'll want to word that carefully so it doesn't imply users shouldn't use modules that don't have available types, though.
+### `socketlib`: Synchronizing Data Between Clients
+### `libWrapper`: A Wrapper Around One or More Libs
+## Generating Types for Other Modules
+"if a module is written in TypeScript, you can extract the types and integrate them into your system by ..."
+`tsc --noEmit false --emitDeclarationOnly --outDir types` then move them into @types and import them in index.d.ts
 
 ## Acknowledgments
 
