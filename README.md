@@ -20,8 +20,8 @@ These type definitions enable full TypeScript type checking for the Foundry API,
 This process can be broadly divided into two main steps:
 1. Preparing your project to use TypeScript.
 2. Configuring TypeScript to use the `fvtt-types` library of Foundry-specific type definitions.
-# Preparing Your Project
-## Installing the TypeScript Compiler
+## 1. Preparing Your Project to Use TypeScript
+### Installing the TypeScript Compiler
 TypeScript is a language designed for developers, meaning it must be compiled into plain JavaScript before Foundry VTT can execute it. To get started, you'll need to install the TypeScript compiler. The easiest way to do this is via [Node.js](https://nodejs.org/en/download/package-manager) and its package manager, `npm`. If you don’t already have Node.js installed, download and install it from the provided link. Then, open your terminal and run the following command:
 ```bash
 npm install -g typescript
@@ -31,22 +31,46 @@ To confirm the installation, you can check the compiler version by running:
 tsc --version
 ```
 This should display the version number of TypeScript, indicating it has been installed globally.
-## Configuring TypeScript with `./tsconfig.json`
+### Initial Configuration via `tsconfig.json`
 Before using TypeScript in Foundry projects, you need to configure it properly. TypeScript’s settings are defined in a `tsconfig.json` file, which should be located at the root of your project directory. This file allows you to customize TypeScript’s behavior, specify which files to compile and which types to include, and set up various compiler options.
 To create a basic `tsconfig.json` file, navigate to your project's root directory in the terminal and run:
 ```bash
 tsc --init
 ```
 This command generates a default `tsconfig.json` file with common configuration settings. Next, open `tsconfig.json` and update the following settings to ensure compatibility with the Foundry VTT API:
-
 > (collapsible section containing explanations of each setting)
+## 2. Configuring `fvtt-types`
+### Installing the `fvtt-types` Type Definitions
 
-## `./@types/`: Ambient Type Declaration Files
-- description of the difference between ambient types and "normal" types
-- use of `declare global`
-- recommendation to create a `.d.ts` file to contain all configuration data for VFTT-Types
-- adding these type definitions to `tsconfig.json`
+### Preparing `fvtt-types`
+Once installed, you'll need to configure `fvtt-types` with type information specific to your project: which subclasses of Actor, Item, etc. you're using; the shapes of their `system` schemas; any settings you've defined; and any flags you'll be using. The rest of this guide will walk you through each of these steps.
 
+#### Creating Ambient Type Declaration Files in `./@types/`
+To keep your project organized, it's recommended to contain all of the `fvtt-types` configuration data in one place. Fortunately, TypeScript provides an ideal feature to enable this, namely, creating a single file of "ambient" type declarations that will apply across your entire project.
+##### Understanding Ambient Types vs. Standard Types
+In TypeScript, **ambient types** are global type declarations that allow you to add type information for entities that exist in the global scope. Unlike "normal" types, which are typically imported and scoped to specific modules, ambient types are accessible throughout your entire project without needing imports. They’re often used to provide type information for libraries or APIs that don't come with built-in TypeScript definitions — much like Foundry VTT!
+
+> ##### Aside: Using `declare global` and the Role of `.d.ts` Files
+> In TypeScript, you can use the `declare global` statement to explicitly declare types as globally accessible. Functionally, there is little difference between defining your global types in an ambient type declaration file, or by wrapping them inside a `declare global` block.  That being said, `.d.ts` files—TypeScript’s **ambient declaration files**—are specifically designed to contain global declarations and type definitions without any compiled output. Files with a `.d.ts` extension serve purely for declaring types and don’t generate JavaScript files during compilation, making them ideal for project-wide configurations.
+
+##### Setting Up a `.d.ts` File for Foundry VTT Type Declarations
+1. **Create a `@types` Folder:** Inside your main scripts folder (or the root directory of your project), create a subfolder named `@types`. This folder will hold all custom type declaration files for your project.
+2. **Add a `.d.ts` File:** Inside `@types`, create a new file, such as `fvtt-types-config.d.ts`. This file will hold all the type declarations required by Foundry’s API, making it easier to manage and modify type settings as needed.
+##### Adding Type Definitions to `tsconfig.json`
+
+Once your `.d.ts` file is ready, you need to add the `@types` folder to your TypeScript configuration file so the compiler knows where to locate these types. Open your `tsconfig.json` file, and within the `"include"` or `"typeRoots"` field, specify the path to the `@types` folder:
+
+```json
+{
+  "compilerOptions": {
+    ...
+  },
+  "include": [
+    "./@types/**/*",
+    ...
+  ]
+}
+```
 # Working with FVTT-Types
 ## Installing FVTT-Types
 ## Declaration Merging
