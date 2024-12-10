@@ -13,11 +13,7 @@ a|image::https://img.shields.io/discord/732325252788387980?label=League%20of%20E
 
 These type definitions enable full TypeScript type checking for Foundry API versions *12* and *13*.
 This guide will walk you through setting up your Foundry project to use TypeScript with the `foundry-vtt-types` type definitions.
-
-[NOTE]
-====
-This guide uses the word "project" to refer to the Foundry system or module you're working on.
-====
+Whether you are writing a system, a module, or simply a macro this guide can be useful to you if you want to use TypeScript during development.
 
 If you are unfamiliar with TypeScript, start here:
 
