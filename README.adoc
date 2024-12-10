@@ -3,23 +3,25 @@
 [.text-center]
 image::./media/img/league-logo-ts.svg[alt="League Logo TS", width=150]
 
+[.text-center]
 Unofficial TypeScript type definitions for link:https://foundryvtt.com/[Foundry Virtual Tabletop].
 
-[.text-center, frame="none", grid="none", stripes="none", width="300px", padding="0", margin="0"]
+[.text-center, frame="none", grid="none", stripes="none", width="500px", padding="0", margin="0"]
 |===
 a|image::https://img.shields.io/discord/732325252788387980?label=League%20of%20Extraordinary%20Foundry%20VTT%20Developers[link=https://discord.gg/52DNPzqm2Z, margin="0", padding="0"] a|image::https://img.shields.io/npm/v/@league-of-foundry-developers/foundry-vtt-types/latest[link=https://www.npmjs.com/package/@league-of-foundry-developers/foundry-vtt-types, margin="0", padding="0"]
 |===
 
-[CAUTION]
-.Supported Foundry VTT Versions
+These type definitions enable full TypeScript type checking for Foundry API versions *12* and *13*.
+This guide will walk you through setting up your Foundry project to use TypeScript with the `foundry-vtt-types` type definitions.
+
+[NOTE]
 ====
-These type definitions are designed to work with Foundry VTT versions #minimum version?# through #maximum version?#.
+This guide uses the word "project" to refer to the Foundry system or module you're working on.
 ====
 
-These type definitions enable full TypeScript type checking for the Foundry API.
-This guide will walk you through setting up your Foundry project to use TypeScript with the `fvtt-types` type definitions.
+If you are unfamiliar with TypeScript, start here:
 
-.*What is TypeScript, and why should I use it?*
+.*What is TypeScript? Why should I use it?*
 [%collapsible]
 ====
 TypeScript is a developer-facing language based on JavaScript. Think of it like a "wrapper" around JavaScript that adds additional syntax and features to help you write better code, including static typing, enhanced tooling, and better support for modern programming practices.
@@ -29,15 +31,15 @@ Coding in TypeScript will help you spot errors earlier; make your code more robu
 A full introduction to TypeScript is beyond the scope of this document.
 If you are new to coding with TypeScript, the *link:https://www.typescriptlang.org/docs/[official documentation]* includes several tutorials for programmers of all skill levels.
 ====
-
 [discrete]
 = Setting Up Your Foundry TypeScript Project
 
-This process can be broadly divided into three steps:
+This process can be broadly divided into four steps:
 
-. Preparing your project to use TypeScript.
-. Preparing TypeScript to use the `fvtt-types` library of Foundry-specific type definitions.
-. Configuring the `fvtt-types` library to match the requirements of your system or module.
+. Configuring your project to use TypeScript.
+. Configuring TypeScript to use `foundry-vtt-types`.
+. Configuring `foundry-vtt-types` to work with your specific project.
+. Configuring Vite to compile your project into a module or system ready for use in Foundry.
 
 The remainder of this guide will walk you through each of these steps.
 
@@ -46,7 +48,7 @@ The remainder of this guide will walk you through each of these steps.
 This is a *highly opinionated* guide. It is not intended to provide you with a complete understanding of the many different ways you could set up your TypeScript project, but rather to offer a quick, clear, and convenient recipe that should be more than enough for the majority of use cases.
 ====
 
-== 1. Preparing Your Project to Use TypeScript
+== 1. Configuring Your Project to Use TypeScript
 
 === Installing the TypeScript Compiler
 
@@ -69,16 +71,27 @@ tsc --version
 
 This should display the version number of TypeScript, indicating it has been installed globally.
 
+=== Initializing Your Project with `npm`
+
+Ensure your project is properly set up for Node.js and `npm` (i.e. it has a `package.json` file).
+You can initialize a new `npm` project by running the following terminal command from the root directory of your project:
+
+[source,console]
+----
+npm init
+----
+
+This command will guide you through creating a `package.json` file. You can accept the default values or customize them as needed for your project.
+
 === Organizing Your Files and Folders
 
-This guide both recommends and assumes that you organize your project with the following folder structure.
-Just create the folders at this point; I've included files we'll be using later in the guide for reference, but you don't need to worry about them yet:
+Once your npm project is set up, organize your project with the following folder structure. Just create the folders at this point; I've included files we'll be using later in the guide for reference, but you don't need to worry about them yet:
 
 [listing]
 ----
-my-typescript-system
+my-typescript-project
 ├── dist                    <1>
-├── public                  <2>
+├── static                  <2>
 │   ├── assets
 │   │   ├── images
 │   │   └── fonts
@@ -98,27 +111,27 @@ my-typescript-system
 ├── tsconfig.json
 └── vite.config.ts
 ----
-<1> After compiling and building your project, this folder will contain your final system or module in its entirety _(i.e. what you'll actually distribute to users)_.
-<2> The `public` folder contains project files that don't require any compiling or processing before they are used, such as images, fonts, localization files, HBS templates, etc.. These files will be copied to the `/dist` folder as-is during the build process. _(I've included a few examples, which may or may not be relevant to your project.)_
+<1> After Vite compiles and builds your project, the `dist` folder will contain your final system or module in its entirety _(i.e. what you'll actually distribute to users)_.
+<2> The `static` folder contains project files that don't require any compiling or processing before they are used, such as images, fonts, localization files, Handlebars templates, etc. These files will be copied to the `dist` folder as-is during the build process. _(I've included a few examples, which may or may not be relevant to your project.)_
 <3> Conversely, the `src` folder contains files that need processing before they can be used, such as TypeScript files that must be compiled to JavaScript and SCSS files that must be compiled to CSS.
 
-=== Configuring TypeScript: Your `tsconfig.json` File
+== 2. Configuring TypeScript to Use `foundry-vtt-types`
 
-TypeScript settings are defined in a `tsconfig.json` file, which should be located in the same folder as your project's `package.json` file. This file allows you to customize TypeScript's behavior, specify which files to compile and which types to include, and set up various compiler options.
+=== Your `tsconfig.json` File
 
-Create a blank `tsconfig.json` file in your project's root directory, and copy the following code into it:
+TypeScript settings can be defined in a `tsconfig.json` file located in the root folder of your project (i.e. adjacent to your project's `package.json` file). This file allows you to customize TypeScript's behavior, specify which files to compile and which types to include, and set up various other compiler options.
+
+Create a blank `tsconfig.json` file in your project's root directory, and copy the following into it:
 
 [source,json]
 ----
 {
   "$schema": "https://json.schemastore.org/tsconfig.json",
-  "references": [{ "path": "./src" }],
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": false,
     "module": "Node16",
-    "moduleResolution": "Node16",
     "noEmit": true,
     "target": "ES2023",
     "outDir": "dist",
@@ -135,17 +148,15 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
 }
 ----
 
-.*Explanations of the settings in the `tsconfig.json` file*
+If you'd like to dig a bit deeper into what each of these settings do, read on:
+
+.*`tsconfig.json` Settings Summary*
 [%collapsible]
 ====
 [horizontal]
 $schema:: Points to the official JSON Schema definition for TypeScript configuration files. This enables better editor support, including autocompletion and validation of your `tsconfig.json` settings.
 +
 Setting this to *"https://json.schemastore.org/tsconfig.json"* helps catch configuration errors and provides inline documentation.
-
-references:: Specifies additional `tsconfig.json` files that should be included as part of your module's TypeScript configuration, which is useful when organizing large modules into separate components.
-+
-Setting this to *[{ "path": "./src" }]* tells TypeScript to look for additional `tsconfig.json` files in your source directory. _(You shouldn't need to do this unless you need different parts of your project to be compiled under different TypeScript settings.)_
 
 allowImportingTsExtensions:: Controls whether you can use TypeScript-specific extensions (like `.ts`) in import statements. By default, TypeScript expects you to either omit the extension or use `.js` extensions (e.g., `import "./myFile"` or `import "./myFile.js"`), even when importing from `.ts` files.
 +
@@ -159,13 +170,9 @@ allowSyntheticDefaultImports:: Controls whether you can use simplified import sy
 +
 Setting this to *false* ensures your imports match Foundry's module structure exactly, preventing subtle runtime errors.
 
-module:: Determines how TypeScript generates JavaScript module code from your source files. By default, TypeScript uses `CommonJS` style modules.
+module:: Determines how TypeScript generates JavaScript module code from your source files. By default, TypeScript uses CommonJS style modules.
 +
-Setting this to *"Node16"* ensures your project uses modern ES Module syntax. _(This matches Foundry's expectations and enables important features like dynamic imports that you might need for loading content conditionally.)_
-
-moduleResolution:: Controls how TypeScript finds files that you import. By default, TypeScript uses `Node10` style resolution.
-+
-Setting this to *"Node16"* pairs with the `module` setting above. _(Together, these settings ensure your development environment matches how Foundry will actually load your code at runtime.)_
+Setting this to *"Node16"* is necessary for certain internal imports in `foundry-vtt-types` to work. Future updates may change this requirement.
 
 noEmit:: Controls whether TypeScript should prevent ("no emit") the generation of JavaScript files during compilation.
 +
@@ -177,7 +184,7 @@ Setting this to *"ES2023"* allows you to use modern JavaScript features that Fou
 
 outDir:: Specifies where compiled JavaScript files should be placed relative to your source TypeScript files.
 +
-Setting this to *"dist"* ensures that your compiled JavaScript is placed in the `./dist` folder, which aligns with the file structure described above.
+Setting this to *"dist"* ensures that your compiled JavaScript is placed in the `dist` folder, which aligns with the file structure described above.
 
 types:: Lists any additional type definition packages that should be included globally in your project. By default, TypeScript automatically includes all `@types` packages it can find in `node_modules`.
 +
@@ -197,9 +204,9 @@ Setting this to *true* enables proper typing for your project's JSON files. _(Th
 
 strict:: Enables TypeScript's complete set of strict type checking options. By default, these strict checks are disabled.
 +
-Setting this to *true* enables several critical safety checks that will help prevent common bugs in Foundry development:
+Setting this to *true* enables all of the following:
 +
-* `noImplicitAny`: Ensures you explicitly declare types _(preventing subtle bugs when working with Foundry's API)_
+* `noImplicitAny`: Requires you to explicitly declare your types. By default, TypeScript will infer the `any` type for any variable that doesn't have an explicit type declaration. This is risky because the `any` type bypasses all type checking, potentially leading to runtime errors. Explicit type declarations enhance code safety and maintainability.
 * `strictNullChecks`: Forces you to handle cases where values might be `null` _(common when working with optional document fields)_
 * `strictFunctionTypes`: Makes sure your function parameters match exactly _(important when implementing Foundry's interfaces)_
 * `strictBindCallApply`: Ensures correct typing when using JavaScript's function methods _(especially relevant when working with event handlers)_
@@ -208,17 +215,21 @@ Setting this to *true* enables several critical safety checks that will help pre
 
 noUncheckedIndexedAccess:: Requires you to verify that array elements or object properties exist before using them.
 +
-Setting this to *true* helps prevent runtime errors by forcing you to check whether values exist. _(This is particularly important in Foundry development because you'll often be accessing dynamic data like `actor.items[0]` or `token.data.flags["my-module"]`, which might not always exist.)_
+Setting this to *true* forces you to check whether a value accessed from an array or object exists (i.e. is not `undefined`) before you attempt to use it. This prevents runtime errors when accessing dynamic Foundry data like `actor.items[0]` or `token.data.flags["my-module"]`, which might not always exist.
 
-noUncheckedSideEffectImports:: Controls whether TypeScript allows importing files purely for their initialization effects (like registering hooks or adding properties to the global `game` object).
+noUncheckedSideEffectImports:: Ensures TypeScript resolves all import paths, even if they don't import anything that requires type-checking. By default, TypeScript will ignore imports that don't resolve to any values (i.e. files imported for their top-level "side effects", like registering hooks or defining properties in the global scope).
 +
-Setting this to *true* requires you to be explicit about imports that only initialize features rather than providing values, making your code's behavior more transparent.
+Setting this to *true* ensures all imports must resolve correctly, improving code reliability.
 
 useUnknownInCatchVariables:: Makes error variables in catch blocks have type `unknown` instead of `any`, requiring you to verify what kind of error you caught before working with it.
 +
 Setting this to *true* ensures safer error handling by preventing you from assuming properties exist on caught errors without checking first.
 
-noImplicitOverride:: Requires explicit marking of methods that override Foundry's base classes.
+noImplicitOverride:: Requires explicit marking of methods that override their base class.
 +
-Setting this to *true* helps prevent accidental breaking changes when extending Foundry's document classes.
+Setting this to *true* makes overrides more explicit, ensuring you never accidentally override a base class without realizing it.
 ====
+
+=== Installing `foundry-vtt-types`
+
+_(TODO)_
