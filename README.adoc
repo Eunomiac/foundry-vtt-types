@@ -1,5 +1,7 @@
 = foundry-vtt-types
 
+:source-highlighter: highlight.js
+
 [.text-center]
 image::./media/img/league-logo-ts.svg[alt="League Logo TS", width=150]
 
@@ -32,14 +34,14 @@ The remainder of this guide will walk you through each of these steps.
 
 TypeScript is a language designed for developers, meaning it must be compiled into plain JavaScript before Foundry VTT can execute it. To get started, you'll need to install the TypeScript compiler. The easiest way to do this is via link:https://nodejs.org/en/download/package-manager[Node.js] and its package manager, `npm`. If you don’t already have Node.js installed, download and install it from the provided link. Then, open your terminal and run the following command:
 
-[source,bash]
+[source,console]
 ----
 npm install -g typescript
 ----
 
 To confirm the installation, you can check the compiler version by running:
 
-[source,bash]
+[source,console]
 ----
 tsc --version
 ----
@@ -52,7 +54,7 @@ Before using TypeScript in Foundry projects, you need to configure it properly. 
 
 To create a basic `tsconfig.json` file, navigate to your project's root directory in the terminal and run:
 
-[source,bash]
+[source,console]
 ----
 tsc --init
 ----

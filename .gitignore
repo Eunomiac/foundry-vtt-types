@@ -3,5 +3,5 @@
 /.vscode
 tsconfig.vitest-temp.json
 
+/dev
 *.code-workspace
-README_ORIGINAL.md
