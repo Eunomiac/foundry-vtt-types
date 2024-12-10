@@ -177,7 +177,7 @@ Setting this to *"ES2023"* allows you to use modern JavaScript features that Fou
 
 outDir:: Specifies where compiled JavaScript files should be placed relative to your source TypeScript files.
 +
-Setting this to *"dist"* ensures that your compiled JavaScript is placed in the `./dist` folder, which aligns with the file structure of your project described above #(coming soon)#.
+Setting this to *"dist"* ensures that your compiled JavaScript is placed in the `./dist` folder, which aligns with the file structure described above.
 
 types:: Lists any additional type definition packages that should be included globally in your project. By default, TypeScript automatically includes all `@types` packages it can find in `node_modules`.
 +
