@@ -81,7 +81,7 @@ This should display the version number of TypeScript, indicating it has been ins
 
 === Organizing Your Files and Folders
 
-Once your npm project is set up, organize your project with the following folder structure. Just create the folders at this point; I've included files we'll be using later in the guide for reference, but you don't need to worry about them yet:
+Once your npm project is set up, organize your project with the following folder structure. Just create the folders at this point; this guide includes files that will be used later for reference that you don't need to worry about them yet:
 
 [listing]
 ----
@@ -108,7 +108,7 @@ my-typescript-project
 └── vite.config.ts
 ----
 <1> After Vite compiles and builds your project, the `dist` folder will contain your final system or module in its entirety _(i.e. what you'll actually distribute to users)_.
-<2> The `static` folder contains project files that don't require any compiling or processing before they are used, such as images, fonts, localization files, Handlebars templates, etc. These files will be copied to the `dist` folder as-is during the build process. _(I've included a few examples, which may or may not be relevant to your project.)_
+<2> The `static` folder contains project files that don't require any compiling or processing before they are used, such as images, fonts, localization files, Handlebars templates, etc. These files will be copied to the `dist` folder as-is during the build process. _(A few examples have been included, which may or may not be relevant to your project.)_
 <3> Conversely, the `src` folder contains files that need processing before they can be used, such as TypeScript files that must be compiled to JavaScript and SCSS files that must be compiled to CSS.
 
 == 2. Configuring TypeScript to Use `foundry-vtt-types`
