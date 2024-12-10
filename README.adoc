@@ -106,6 +106,10 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
 [%collapsible]
 ====
 [horizontal]
+$schema:: Points to the official JSON Schema definition for TypeScript configuration files. This enables better editor support, including autocompletion and validation of your tsconfig.json settings.
++
+Setting this to *"https://json.schemastore.org/tsconfig.json"* helps catch configuration errors and provides inline documentation.
+
 allowImportingTsExtensions:: Allows your code to directly import TypeScript files using their `.ts` extensions, which is helpful when organizing your Foundry module's source files.
 +
 Setting this to *true* enables clearer imports in your module code, making it easier to track dependencies between files.
@@ -173,4 +177,8 @@ Setting this to *true* ensures safer error handling by preventing you from assum
 noImplicitOverride:: Requires explicit marking of methods that override Foundry's base classes.
 +
 Setting this to *true* helps prevent accidental breaking changes when extending Foundry's document classes.
+
+references:: Specifies other TypeScript projects that this configuration depends on, typically used to organize code into smaller, more manageable pieces.
++
+Setting this to *[{ "path": "./src" }]* tells TypeScript to look for additional `tsconfig.json` files in your source directory, allowing you to split your Foundry module's configuration into separate components.
 ====
