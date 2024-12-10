@@ -176,7 +176,7 @@ Setting this to *true* prevents the TypeScript compiler from creating actual Jav
 
 target:: Specifies which JavaScript version your TypeScript code should be converted to. By default, TypeScript targets older versions of JavaScript for maximum compatibility.
 +
-Setting this to *"ES2023"* allows you to use modern JavaScript features that Foundry supports.
+Since Foundy itself uses very modern features, setting this to *"ES2023"* aligns with Foundry.
 
 outDir:: Specifies where compiled JavaScript files should be placed relative to your source TypeScript files.
 +
