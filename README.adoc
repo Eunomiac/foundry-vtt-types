@@ -50,27 +50,6 @@ This is a *highly opinionated* guide. It is not intended to provide you with a c
 
 == 1. Configuring Your Project to Use TypeScript
 
-=== Installing the TypeScript Compiler
-
-TypeScript is a language designed for developers, meaning it must be compiled into plain JavaScript before Foundry VTT can execute it.
-
-To get started, you'll need to install the TypeScript compiler.
-The easiest way to do this is via link:https://nodejs.org/en/download/package-manager[Node.js] and its package manager, `npm`. If you don’t already have Node.js installed, download and install it from the provided link. Then, open your terminal and run the following command:
-
-[source,console]
-----
-npm install -g typescript
-----
-
-To confirm the installation, you can check the compiler version by running:
-
-[source,console]
-----
-tsc --version
-----
-
-This should display the version number of TypeScript, indicating it has been installed globally.
-
 === Initializing Your Project with `npm`
 
 Ensure your project is properly set up for Node.js and `npm` (i.e. it has a `package.json` file).
@@ -82,6 +61,27 @@ npm init
 ----
 
 This command will guide you through creating a `package.json` file. You can accept the default values or customize them as needed for your project.
+
+=== Installing TypeScript
+
+TypeScript is a language that compiles into JavaScript. This means before Foundry VTT can execute it must be compiled into plain JavaScript.
+
+To get started, you'll need to install the TypeScript compiler.
+The easiest way to do this is via link:https://nodejs.org/en/download/package-manager[Node.js] and its package manager, `npm`. If you don't already have Node.js installed, download and install it from the provided link. Then, open your terminal and run the following command:
+
+[source,console]
+----
+npm add --include=dev typescript
+----
+
+To confirm the installation, you can check the compiler version by running:
+
+[source,console]
+----
+npx tsc --version
+----
+
+This should display the version number of TypeScript, indicating it has been installed in your project successfully.
 
 === Organizing Your Files and Folders
 
