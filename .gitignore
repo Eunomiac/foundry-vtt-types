@@ -2,3 +2,6 @@
 /.idea/
 /.vscode
 tsconfig.vitest-temp.json
+
+*.code-workspace
+README_ORIGINAL.md
