@@ -93,7 +93,6 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "strict": true,
-    "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "noUncheckedSideEffectImports": true,
     "useUnknownInCatchVariables": true,
@@ -137,7 +136,7 @@ Setting this to *"ES2023"* allows you to use modern JavaScript features that Fou
 
 outDir:: Specifies where your compiled JavaScript files should be placed relative to your source TypeScript files.
 +
-Setting this to *"dist"* follows Foundry's recommended practice of keeping source and compiled files separate.
+Setting this to *"dist"* ensures that your compiled JavaScript files are placed where they should be, in accordance with the file structure described #above (coming soon)#.
 
 types:: Lists any additional type definition packages that should be included globally in your project. By default, TypeScript would automatically include all `@types` packages it can find in node_modules.
 +
@@ -147,9 +146,9 @@ verbatimModuleSyntax:: Controls how TypeScript preserves your module import and 
 +
 Setting this to *true* preserves your exact import/export statements in the compiled code, making it easier to understand how your module interacts with Foundry's systems both during development and at runtime.
 
-forceConsistentCasingInFileNames:: Ensures consistent file naming across different operating systems, which is important because Foundry modules need to work on various platforms.
+forceConsistentCasingInFileNames:: Ensures that when you import files, the casing in your import statement must exactly match the actual filename. For example, `import "./MyFile.ts"` won't work if the file is actually named `myfile.ts`.
 +
-Setting this to *true* prevents deployment issues when sharing your module.
+Setting this to *true* prevents bugs that could occur when your module runs on case-sensitive systems (like Linux) after being developed on case-insensitive systems (like Windows).
 
 resolveJsonModule:: Allows you to import JSON files as modules, which is useful for handling Foundry's manifest files and data templates.
 +
@@ -158,10 +157,6 @@ Setting this to *true* enables proper typing for your module's JSON configuratio
 strict:: Enables TypeScript's strictest type-checking options, helping catch common mistakes when working with Foundry's API.
 +
 Setting this to *true* provides the safest development environment for Foundry module development.
-
-skipLibCheck:: Controls whether TypeScript should type-check declaration files from your dependencies.
-+
-Setting this to *true* improves build performance while maintaining type safety in your module code.
 
 noUncheckedIndexedAccess:: Requires you to verify that array elements or object properties exist before using them. For example, when accessing items in an Actor's inventory or properties of a Document.
 +
