@@ -1,15 +1,16 @@
 = foundry-vtt-types
 
 :source-highlighter: highlight.js
+:stylesheet: README.css
 
 [.text-center]
 image::./media/img/league-logo-ts.svg[alt="League Logo TS", width=150]
 
 TypeScript type definitions for link:https://foundryvtt.com/[Foundry Virtual Tabletop] (unofficial)
 
-[.text-center, frame="none", grid="none", stripes="none", width="300px"]
+[.text-center, frame="none", grid="none", stripes="none", width="300px", padding="0", margin="0"]
 |===
-a|image::https://img.shields.io/discord/732325252788387980?label=League%20of%20Extraordinary%20Foundry%20VTT%20Developers[link=https://discord.gg/52DNPzqm2Z] a|image::https://img.shields.io/npm/v/@league-of-foundry-developers/foundry-vtt-types/latest[link=https://www.npmjs.com/package/@league-of-foundry-developers/foundry-vtt-types]
+a|image::https://img.shields.io/discord/732325252788387980?label=League%20of%20Extraordinary%20Foundry%20VTT%20Developers[link=https://discord.gg/52DNPzqm2Z, margin="0", padding="0"] a|image::https://img.shields.io/npm/v/@league-of-foundry-developers/foundry-vtt-types/latest[link=https://www.npmjs.com/package/@league-of-foundry-developers/foundry-vtt-types, margin="0", padding="0"]
 |===
 
 == Supported Foundry VTT versions
