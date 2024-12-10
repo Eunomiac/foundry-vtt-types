@@ -69,7 +69,40 @@ tsc --version
 
 This should display the version number of TypeScript, indicating it has been installed globally.
 
-=== Initial Configuration: Your `tsconfig.json` File
+=== Organizing Your Files and Folders
+
+This guide both recommends and assumes that you organize your project with the following folder structure.
+Just create the folders at this point; I've included files we'll be using later in the guide for reference, but you don't need to worry about them yet:
+
+[listing]
+----
+my-typescript-system
+├── dist                    <1>
+├── public                  <2>
+│   ├── assets
+│   │   ├── images
+│   │   └── fonts
+│   ├── lang
+│   │   └── en.json
+│   ├── packs
+│   ├── templates
+│   └── system.json          // (or module.json)
+├── src                     <3>
+│   ├── ts
+│   ├── scss
+│   ├── index.js
+│   ├── index.html
+│   └── style.css
+├── package.json
+├── README.md
+├── tsconfig.json
+└── vite.config.ts
+----
+<1> After compiling and building your project, this folder will contain your final system or module in its entirety _(i.e. what you'll actually distribute to users)_.
+<2> The `public` folder contains project files that don't require any compiling or processing before they are used, such as images, fonts, localization files, HBS templates, etc.. These files will be copied to the `/dist` folder as-is during the build process. _(I've included a few examples, which may or may not be relevant to your project.)_
+<3> Conversely, the `src` folder contains files that need processing before they can be used, such as TypeScript files that must be compiled to JavaScript and SCSS files that must be compiled to CSS.
+
+=== Configuring TypeScript: Your `tsconfig.json` File
 
 TypeScript settings are defined in a `tsconfig.json` file, which should be located in the same folder as your project's `package.json` file. This file allows you to customize TypeScript's behavior, specify which files to compile and which types to include, and set up various compiler options.
 
@@ -79,6 +112,7 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
 ----
 {
   "$schema": "https://json.schemastore.org/tsconfig.json",
+  "references": [{ "path": "./src" }],
   "compilerOptions": {
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
@@ -97,8 +131,7 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
     "noUncheckedSideEffectImports": true,
     "useUnknownInCatchVariables": true,
     "noImplicitOverride": true
-  },
-  "references": [{ "path": "./src" }]
+  }
 }
 ----
 
@@ -106,79 +139,86 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
 [%collapsible]
 ====
 [horizontal]
-$schema:: Points to the official JSON Schema definition for TypeScript configuration files. This enables better editor support, including autocompletion and validation of your tsconfig.json settings.
+$schema:: Points to the official JSON Schema definition for TypeScript configuration files. This enables better editor support, including autocompletion and validation of your `tsconfig.json` settings.
 +
 Setting this to *"https://json.schemastore.org/tsconfig.json"* helps catch configuration errors and provides inline documentation.
 
-allowImportingTsExtensions:: Allows your code to directly import TypeScript files using their `.ts` extensions, which is helpful when organizing your Foundry module's source files.
+references:: Specifies additional `tsconfig.json` files that should be included as part of your module's TypeScript configuration, which is useful when organizing large modules into separate components.
 +
-Setting this to *true* enables clearer imports in your module code, making it easier to track dependencies between files.
+Setting this to *[{ "path": "./src" }]* tells TypeScript to look for additional `tsconfig.json` files in your source directory. _(You shouldn't need to do this unless you need different parts of your project to be compiled under different TypeScript settings.)_
 
-esModuleInterop:: Smooths out differences between how different module systems handle imports and exports, which is important because Foundry uses ES Modules for its module system.
+allowImportingTsExtensions:: Controls whether you can use TypeScript-specific extensions (like `.ts`) in import statements. By default, TypeScript expects you to either omit the extension or use `.js` extensions (e.g., `import "./myFile"` or `import "./myFile.js"`), even when importing from `.ts` files.
 +
-Setting this to *true* helps prevent compatibility issues when importing Foundry's core libraries and other modules.
+Setting this to *true* enables importing with `.ts` extensions. _(This works together with Vite's build process - Vite knows how to handle these TypeScript imports and will ensure they work correctly in the final JavaScript bundle.)_
+
+esModuleInterop:: Smooths out differences between how different module systems handle imports and exports. By default, TypeScript applies stricter rules that can cause compatibility issues.
++
+Setting this to *true* helps prevent problems when importing libraries. _(While Foundry uses ES Modules, some older libraries you might need could use different formats. This setting helps them work together seamlessly.)_
 
 allowSyntheticDefaultImports:: Controls whether you can use simplified import syntax for modules that don't explicitly define default exports, which includes many Foundry API features.
 +
 Setting this to *false* ensures your imports match Foundry's module structure exactly, preventing subtle runtime errors.
 
-module:: Determines how TypeScript handles module imports and exports in your code, which affects how your module interacts with Foundry's systems.
+module:: Determines how TypeScript generates JavaScript module code from your source files. By default, TypeScript uses `CommonJS` style modules.
 +
-Setting this to *"Node16"* ensures compatibility with Foundry's modern JavaScript environment.
+Setting this to *"Node16"* ensures your project uses modern ES Module syntax. _(This matches Foundry's expectations and enables important features like dynamic imports that you might need for loading content conditionally.)_
 
-moduleResolution:: Controls how TypeScript locates imported files, which is crucial for properly resolving Foundry's API types and your module's own files.
+moduleResolution:: Controls how TypeScript finds files that you import. By default, TypeScript uses `Node10` style resolution.
 +
-Setting this to *"Node16"* matches Foundry's expected module resolution behavior.
+Setting this to *"Node16"* pairs with the `module` setting above. _(Together, these settings ensure your development environment matches how Foundry will actually load your code at runtime.)_
 
-noEmit:: Controls whether TypeScript should prevent the generation of JavaScript files during compilation.
+noEmit:: Controls whether TypeScript should prevent ("no emit") the generation of JavaScript files during compilation.
 +
-Setting this to *true* tells TypeScript not to generate any JavaScript files. This may sound counterintuitive, but as you'll soon see, you'll be using Vite to generate your module's final JavaScript files, not the TypeScript compiler.
+Setting this to *true* prevents the TypeScript compiler from creating actual JavaScript files when it is run. _(This may seem counterproductive, but as you'll soon see, we'll be using Vite to create the final JavaScript for your project, rather than the TypeScript compiler directly.)_
 
-target:: Specifies which JavaScript version your TypeScript code should compile to, ensuring compatibility with Foundry's supported browser versions.
+target:: Specifies which JavaScript version your TypeScript code should be converted to. By default, TypeScript targets older versions of JavaScript for maximum compatibility.
 +
 Setting this to *"ES2023"* allows you to use modern JavaScript features that Foundry supports.
 
-outDir:: Specifies where your compiled JavaScript files should be placed relative to your source TypeScript files.
+outDir:: Specifies where compiled JavaScript files should be placed relative to your source TypeScript files.
 +
-Setting this to *"dist"* ensures that your compiled JavaScript files are placed where they should be, in accordance with the file structure described #above (coming soon)#.
+Setting this to *"dist"* ensures that your compiled JavaScript is placed in the `./dist` folder, which aligns with the file structure of your project described above #(coming soon)#.
 
-types:: Lists any additional type definition packages that should be included globally in your project. By default, TypeScript would automatically include all `@types` packages it can find in node_modules.
+types:: Lists any additional type definition packages that should be included globally in your project. By default, TypeScript automatically includes all `@types` packages it can find in `node_modules`.
 +
-Setting this to an *empty array* prevents automatic type inclusion, letting you explicitly control which Foundry-related type definitions are included. This helps avoid conflicts between different type definition packages.
+Setting this to an *empty array* prevents automatic type inclusion. _(This might seem strange, but we'll be explicitly importing the Foundry types we need, which gives us better control and prevents conflicts between different type definition packages.)_
 
-verbatimModuleSyntax:: Controls how TypeScript preserves your module import and export statements. This setting prevents TypeScript from rewriting or "down-leveling" your module syntax, ensuring that type imports and runtime imports remain exactly as written.
+verbatimModuleSyntax:: Controls how TypeScript preserves your module import and export statements. This setting prevents TypeScript from rewriting your import/export syntax.
 +
-Setting this to *true* preserves your exact import/export statements in the compiled code, making it easier to understand how your module interacts with Foundry's systems both during development and at runtime.
+Setting this to *true* ensures your imports work exactly as written. _(This is particularly important when working with Foundry's module system, as unexpected transformations of import statements can cause hard-to-debug runtime errors.)_
 
-forceConsistentCasingInFileNames:: Ensures that when you import files, the casing in your import statement must exactly match the actual filename. For example, `import "./MyFile.ts"` won't work if the file is actually named `myfile.ts`.
+forceConsistentCasingInFileNames:: Ensures that when you import files, the casing in your import statement must exactly match the actual filename. For example, `import "./MyFile"` won't work if the file is actually named `myfile.ts`.
 +
-Setting this to *true* prevents bugs that could occur when your module runs on case-sensitive systems (like Linux) after being developed on case-insensitive systems (like Windows).
+Setting this to *true* prevents bugs that could occur when your project runs on case-sensitive systems. _(This is especially important if you're developing on Windows but your users might be running Foundry on Linux, where `MyFile.ts` and `myfile.ts` are treated as different files.)_
 
-resolveJsonModule:: Allows you to import JSON files as modules, which is useful for handling Foundry's manifest files and data templates.
+resolveJsonModule:: Allows you to import JSON files directly as modules.
 +
-Setting this to *true* enables proper typing for your module's JSON configuration files.
+Setting this to *true* enables proper typing for your project's JSON files. _(This is particularly useful for working with your module.json manifest file and any data templates you create, ensuring type safety when accessing their contents.)_
 
-strict:: Enables TypeScript's strictest type-checking options, helping catch common mistakes when working with Foundry's API.
+strict:: Enables TypeScript's complete set of strict type checking options. By default, these strict checks are disabled.
 +
-Setting this to *true* provides the safest development environment for Foundry module development.
+Setting this to *true* enables several critical safety checks that will help prevent common bugs in Foundry development:
++
+* `noImplicitAny`: Ensures you explicitly declare types _(preventing subtle bugs when working with Foundry's API)_
+* `strictNullChecks`: Forces you to handle cases where values might be `null` _(common when working with optional document fields)_
+* `strictFunctionTypes`: Makes sure your function parameters match exactly _(important when implementing Foundry's interfaces)_
+* `strictBindCallApply`: Ensures correct typing when using JavaScript's function methods _(especially relevant when working with event handlers)_
+* `strictPropertyInitialization`: Makes sure you properly initialize class properties _(helpful when extending Foundry's document classes)_
+* `noImplicitThis`: Prevents confusion about what `this` refers to _(particularly important in Foundry's hook callbacks)_
 
-noUncheckedIndexedAccess:: Requires you to verify that array elements or object properties exist before using them. For example, when accessing items in an Actor's inventory or properties of a Document.
+noUncheckedIndexedAccess:: Requires you to verify that array elements or object properties exist before using them.
 +
-Setting this to *true* helps prevent runtime errors by forcing you to check whether values exist before trying to use them.
+Setting this to *true* helps prevent runtime errors by forcing you to check whether values exist. _(This is particularly important in Foundry development because you'll often be accessing dynamic data like `actor.items[0]` or `token.data.flags["my-module"]`, which might not always exist.)_
 
 noUncheckedSideEffectImports:: Controls whether TypeScript allows importing files purely for their initialization effects (like registering hooks or adding properties to the global `game` object).
 +
 Setting this to *true* requires you to be explicit about imports that only initialize features rather than providing values, making your code's behavior more transparent.
 
-useUnknownInCatchVariables:: Makes error variables in catch blocks have type 'unknown' instead of 'any', requiring you to verify what kind of error you caught before working with it.
+useUnknownInCatchVariables:: Makes error variables in catch blocks have type `unknown` instead of `any`, requiring you to verify what kind of error you caught before working with it.
 +
 Setting this to *true* ensures safer error handling by preventing you from assuming properties exist on caught errors without checking first.
 
 noImplicitOverride:: Requires explicit marking of methods that override Foundry's base classes.
 +
 Setting this to *true* helps prevent accidental breaking changes when extending Foundry's document classes.
-
-references:: Specifies other TypeScript projects that this configuration depends on, typically used to organize code into smaller, more manageable pieces.
-+
-Setting this to *[{ "path": "./src" }]* tells TypeScript to look for additional `tsconfig.json` files in your source directory, allowing you to split your Foundry module's configuration into separate components.
 ====
