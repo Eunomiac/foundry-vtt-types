@@ -1,25 +1,37 @@
 = foundry-vtt-types
 
-:source-highlighter: highlight.js
-:stylesheet: README.css
-
 [.text-center]
 image::./media/img/league-logo-ts.svg[alt="League Logo TS", width=150]
 
-TypeScript type definitions for link:https://foundryvtt.com/[Foundry Virtual Tabletop] (unofficial)
+Unofficial TypeScript type definitions for link:https://foundryvtt.com/[Foundry Virtual Tabletop].
 
 [.text-center, frame="none", grid="none", stripes="none", width="300px", padding="0", margin="0"]
 |===
 a|image::https://img.shields.io/discord/732325252788387980?label=League%20of%20Extraordinary%20Foundry%20VTT%20Developers[link=https://discord.gg/52DNPzqm2Z, margin="0", padding="0"] a|image::https://img.shields.io/npm/v/@league-of-foundry-developers/foundry-vtt-types/latest[link=https://www.npmjs.com/package/@league-of-foundry-developers/foundry-vtt-types, margin="0", padding="0"]
 |===
 
-== Supported Foundry VTT versions
+[CAUTION]
+.Supported Foundry VTT Versions
+====
+These type definitions are designed to work with Foundry VTT versions #minimum version?# through #maximum version?#.
+====
 
-_(Will the types be backwards compatible, and if so, how far?)_
+These type definitions enable full TypeScript type checking for the Foundry API.
+This guide will walk you through setting up your Foundry project to use TypeScript with the `fvtt-types` type definitions.
 
-These type definitions enable full TypeScript type checking for the Foundry API, which is a Very Good Thing. TypeScript offers several advantages over plain JavaScript, including static typing, enhanced tooling, and better support for modern programming practices. More to the point, it will help you spot errors earlier, make your code much easier to work with and navigate, and help make sure even complex refactors don't break everything.  This guide will walk you through setting up your Foundry project to use TypeScript with the `fvtt-types` type definitions.
+.*What is TypeScript, and why should I use it?*
+[%collapsible]
+====
+TypeScript is a developer-facing language based on JavaScript. Think of it like a "wrapper" around JavaScript that adds additional syntax and features to help you write better code, including static typing, enhanced tooling, and better support for modern programming practices.
 
-== Setting Up Your Foundry TypeScript Project
+Coding in TypeScript will help you spot errors earlier; make your code more robust, easier to navigate, and less vulnerable to error; and help make sure even complex refactors don't break everything.
+
+A full introduction to TypeScript is beyond the scope of this document.
+If you are new to coding with TypeScript, the *link:https://www.typescriptlang.org/docs/[official documentation]* includes several tutorials for programmers of all skill levels.
+====
+
+[discrete]
+= Setting Up Your Foundry TypeScript Project
 
 This process can be broadly divided into three steps:
 
@@ -29,11 +41,19 @@ This process can be broadly divided into three steps:
 
 The remainder of this guide will walk you through each of these steps.
 
-=== 1. Preparing Your Project to Use TypeScript
+[NOTE]
+====
+This is a *highly opinionated* guide. It is not intended to provide you with a complete understanding of the many different ways you could set up your TypeScript project, but rather to offer a quick, clear, and convenient recipe that should be more than enough for the majority of use cases.
+====
 
-==== Installing the TypeScript Compiler
+== 1. Preparing Your Project to Use TypeScript
 
-TypeScript is a language designed for developers, meaning it must be compiled into plain JavaScript before Foundry VTT can execute it. To get started, you'll need to install the TypeScript compiler. The easiest way to do this is via link:https://nodejs.org/en/download/package-manager[Node.js] and its package manager, `npm`. If you don’t already have Node.js installed, download and install it from the provided link. Then, open your terminal and run the following command:
+=== Installing the TypeScript Compiler
+
+TypeScript is a language designed for developers, meaning it must be compiled into plain JavaScript before Foundry VTT can execute it.
+
+To get started, you'll need to install the TypeScript compiler.
+The easiest way to do this is via link:https://nodejs.org/en/download/package-manager[Node.js] and its package manager, `npm`. If you don’t already have Node.js installed, download and install it from the provided link. Then, open your terminal and run the following command:
 
 [source,console]
 ----
@@ -49,16 +69,65 @@ tsc --version
 
 This should display the version number of TypeScript, indicating it has been installed globally.
 
-==== Initial Configuration via `tsconfig.json`
+=== Initial Configuration: Your `tsconfig.json` File
 
-Before using TypeScript in Foundry projects, you need to configure it properly. TypeScript’s settings are defined in a `tsconfig.json` file, which should be located at the root of your project directory. This file allows you to customize TypeScript’s behavior, specify which files to compile and which types to include, and set up various compiler options.
+TypeScript settings are defined in a `tsconfig.json` file, which should be located in the same folder as your project's `package.json` file. This file allows you to customize TypeScript's behavior, specify which files to compile and which types to include, and set up various compiler options.
 
-To create a basic `tsconfig.json` file, navigate to your project's root directory in the terminal and run:
+Create a blank `tsconfig.json` file in your project's root directory, and copy the following code into it:
 
-[source,console]
+[source,json]
 ----
-tsc --init
+{
+  "$schema": "https://json.schemastore.org/tsconfig.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": false,
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "noEmit": true,
+    "target": "ES2023",
+    "outDir": "dist",
+    "types": [],
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noUncheckedIndexedAccess": true,
+    "noUncheckedSideEffectImports": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true
+  },
+  "references": [{ "path": "./src" }]
+}
 ----
+
+.*Explanations of the settings in the `tsconfig.json` file*
+[%collapsible]
+====
+[horizontal]
+allowImportingTsExtensions:: Allows imports to include TypeScript file extensions (.ts, .mts, .cts).<br>
+Setting this to *true* supports TypeScript-specific imports.
+esModuleInterop:: Enables compatibility with modules that use CommonJS exports. Setting this to true to ensure broader module compatibility.
+allowSyntheticDefaultImports:: Controls whether to allow default imports from modules without default exports. Setting this to false to enforce explicit exports.
+module:: Specifies the module code generation method. Setting this to "Node16" to use Node.js module resolution strategy.
+moduleResolution:: Determines how TypeScript looks up imported modules. Setting this to "Node16" to match modern Node.js resolution behavior.
+noEmit:: Prevents TypeScript from generating output files. Setting this to true since Foundry VTT requires JavaScript files to be managed separately.
+target:: Specifies the ECMAScript target version. Setting this to "ES2023" to use modern JavaScript features supported by current browsers.
+outDir:: Defines the output directory for compiled files. Setting this to "dist" as a conventional output location.
+types:: Array of type packages to include. Empty array allows manual control over included type definitions.
+verbatimModuleSyntax:: Enforces explicit import/export syntax. Setting this to true to prevent automatic type imports.
+forceConsistentCasingInFileNames:: Ensures consistent file naming across different operating systems. Setting this to true to prevent case-sensitivity issues.
+resolveJsonModule:: Enables importing JSON files as modules. Setting this to true to support JSON imports.
+strict:: Enables all strict type checking options. Setting this to true for maximum type safety.
+skipLibCheck:: Skips type checking of declaration files. Setting this to true to improve compilation performance.
+noUncheckedIndexedAccess:: Adds undefined to index signatures. Setting this to true to prevent unchecked array/object access.
+noUncheckedSideEffectImports:: Ensures side-effect imports are explicit. Setting this to true to prevent unintended imports.
+useUnknownInCatchVariables:: Uses 'unknown' instead of 'any' for catch clause variables. Setting this to true for better error handling.
+====
+
+
 
 This command generates a default `tsconfig.json` file with common configuration settings. Next, open `tsconfig.json` and update the following settings to ensure compatibility with the Foundry VTT API:
 
