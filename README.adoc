@@ -107,215 +107,75 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
 [%collapsible]
 ====
 [horizontal]
-allowImportingTsExtensions:: Allows imports to include TypeScript file extensions (.ts, .mts, .cts).<br>
-Setting this to *true* supports TypeScript-specific imports.
-esModuleInterop:: Enables compatibility with modules that use CommonJS exports. Setting this to true to ensure broader module compatibility.
-allowSyntheticDefaultImports:: Controls whether to allow default imports from modules without default exports. Setting this to false to enforce explicit exports.
-module:: Specifies the module code generation method. Setting this to "Node16" to use Node.js module resolution strategy.
-moduleResolution:: Determines how TypeScript looks up imported modules. Setting this to "Node16" to match modern Node.js resolution behavior.
-noEmit:: Prevents TypeScript from generating output files. Setting this to true since Foundry VTT requires JavaScript files to be managed separately.
-target:: Specifies the ECMAScript target version. Setting this to "ES2023" to use modern JavaScript features supported by current browsers.
-outDir:: Defines the output directory for compiled files. Setting this to "dist" as a conventional output location.
-types:: Array of type packages to include. Empty array allows manual control over included type definitions.
-verbatimModuleSyntax:: Enforces explicit import/export syntax. Setting this to true to prevent automatic type imports.
-forceConsistentCasingInFileNames:: Ensures consistent file naming across different operating systems. Setting this to true to prevent case-sensitivity issues.
-resolveJsonModule:: Enables importing JSON files as modules. Setting this to true to support JSON imports.
-strict:: Enables all strict type checking options. Setting this to true for maximum type safety.
-skipLibCheck:: Skips type checking of declaration files. Setting this to true to improve compilation performance.
-noUncheckedIndexedAccess:: Adds undefined to index signatures. Setting this to true to prevent unchecked array/object access.
-noUncheckedSideEffectImports:: Ensures side-effect imports are explicit. Setting this to true to prevent unintended imports.
-useUnknownInCatchVariables:: Uses 'unknown' instead of 'any' for catch clause variables. Setting this to true for better error handling.
+allowImportingTsExtensions:: Allows your code to directly import TypeScript files using their `.ts` extensions, which is helpful when organizing your Foundry module's source files.
++
+Setting this to *true* enables clearer imports in your module code, making it easier to track dependencies between files.
+
+esModuleInterop:: Smooths out differences between how different module systems handle imports and exports, which is important because Foundry uses ES Modules for its module system.
++
+Setting this to *true* helps prevent compatibility issues when importing Foundry's core libraries and other modules.
+
+allowSyntheticDefaultImports:: Controls whether you can use simplified import syntax for modules that don't explicitly define default exports, which includes many Foundry API features.
++
+Setting this to *false* ensures your imports match Foundry's module structure exactly, preventing subtle runtime errors.
+
+module:: Determines how TypeScript handles module imports and exports in your code, which affects how your module interacts with Foundry's systems.
++
+Setting this to *"Node16"* ensures compatibility with Foundry's modern JavaScript environment.
+
+moduleResolution:: Controls how TypeScript locates imported files, which is crucial for properly resolving Foundry's API types and your module's own files.
++
+Setting this to *"Node16"* matches Foundry's expected module resolution behavior.
+
+noEmit:: Controls whether TypeScript should prevent the generation of JavaScript files during compilation.
++
+Setting this to *true* tells TypeScript not to generate any JavaScript files. This may sound counterintuitive, but as you'll soon see, you'll be using Vite to generate your module's final JavaScript files, not the TypeScript compiler.
+
+target:: Specifies which JavaScript version your TypeScript code should compile to, ensuring compatibility with Foundry's supported browser versions.
++
+Setting this to *"ES2023"* allows you to use modern JavaScript features that Foundry supports.
+
+outDir:: Specifies where your compiled JavaScript files should be placed relative to your source TypeScript files.
++
+Setting this to *"dist"* follows Foundry's recommended practice of keeping source and compiled files separate.
+
+types:: Lists any additional type definition packages that should be included globally in your project. By default, TypeScript would automatically include all `@types` packages it can find in node_modules.
++
+Setting this to an *empty array* prevents automatic type inclusion, letting you explicitly control which Foundry-related type definitions are included. This helps avoid conflicts between different type definition packages.
+
+verbatimModuleSyntax:: Controls how TypeScript preserves your module import and export statements. This setting prevents TypeScript from rewriting or "down-leveling" your module syntax, ensuring that type imports and runtime imports remain exactly as written.
++
+Setting this to *true* preserves your exact import/export statements in the compiled code, making it easier to understand how your module interacts with Foundry's systems both during development and at runtime.
+
+forceConsistentCasingInFileNames:: Ensures consistent file naming across different operating systems, which is important because Foundry modules need to work on various platforms.
++
+Setting this to *true* prevents deployment issues when sharing your module.
+
+resolveJsonModule:: Allows you to import JSON files as modules, which is useful for handling Foundry's manifest files and data templates.
++
+Setting this to *true* enables proper typing for your module's JSON configuration files.
+
+strict:: Enables TypeScript's strictest type-checking options, helping catch common mistakes when working with Foundry's API.
++
+Setting this to *true* provides the safest development environment for Foundry module development.
+
+skipLibCheck:: Controls whether TypeScript should type-check declaration files from your dependencies.
++
+Setting this to *true* improves build performance while maintaining type safety in your module code.
+
+noUncheckedIndexedAccess:: Requires you to verify that array elements or object properties exist before using them. For example, when accessing items in an Actor's inventory or properties of a Document.
++
+Setting this to *true* helps prevent runtime errors by forcing you to check whether values exist before trying to use them.
+
+noUncheckedSideEffectImports:: Controls whether TypeScript allows importing files purely for their initialization effects (like registering hooks or adding properties to the global `game` object).
++
+Setting this to *true* requires you to be explicit about imports that only initialize features rather than providing values, making your code's behavior more transparent.
+
+useUnknownInCatchVariables:: Makes error variables in catch blocks have type 'unknown' instead of 'any', requiring you to verify what kind of error you caught before working with it.
++
+Setting this to *true* ensures safer error handling by preventing you from assuming properties exist on caught errors without checking first.
+
+noImplicitOverride:: Requires explicit marking of methods that override Foundry's base classes.
++
+Setting this to *true* helps prevent accidental breaking changes when extending Foundry's document classes.
 ====
-
-
-
-This command generates a default `tsconfig.json` file with common configuration settings. Next, open `tsconfig.json` and update the following settings to ensure compatibility with the Foundry VTT API:
-
-> (collapsible section containing explanations of each setting)
-
-=== 2. Preparing TypeScript to Use the `fvtt-types` Type Definitions
-
-==== Installing the `fvtt-types` Type Definitions
-
-==== Preparing Your Ambient Type Declarations (`.d.ts`)
-
-Once installed, you'll need to configure `fvtt-types` with type information specific to your project: which subclasses of Actor, Item, etc. you're using; the shapes of their `system` schemas; any settings you've defined; and any flags you'll be using. To keep your project organized, it's recommended to contain all of the `fvtt-types` configuration data in one place. Fortunately, TypeScript provides an ideal feature to enable this, namely, creating a single file of "ambient" type declarations that will apply across your entire project.
-
-> _(feel free to skip ahead if a deeper explanation of what's going on doesn't interest you)_
-
-> ##### Understanding Ambient Types vs. Standard Types
-
-> In TypeScript, **ambient types** are global type declarations that allow you to add type information for entities that exist in the global scope. Unlike "normal" types, which are typically imported and scoped to specific modules (much like variables, classes, or any number of things you're likely already familiar with), ambient types are accessible throughout your entire project without needing imports (to continue our analogy to variables, ambient types are like variables that have been assigned to the global scope via `globalThis` or `window`). They’re often used to provide type information for libraries or APIs that offer global functionality but do not provide comprehensive TypeScript type definitions — much like Foundry VTT!
-
->
-
-> ##### `declare global` vs. Ambient Types
-
-> In TypeScript, you can define global types anywhere in your code by simply wrapping the types in a `declare global` block. Functionally, there is little difference between defining your global types this way, or by using an ambient type declaration file. That being said, `.d.ts` files—TypeScript’s **ambient declaration files**—are specifically designed to contain global declarations and type definitions without any compiled output. Files with a `.d.ts` extension serve purely for declaring types and don’t generate JavaScript files during compilation, making them ideal for project-wide configurations.
-
-To pave the way for configuring `fvtt-types` to work with your system or module, follow these steps:
-
-. **Create a `@types` Folder:** Inside your main scripts folder (or the root directory of your project), create a subfolder named `@types`. This folder will hold all custom type declaration files for your project.
-. **Add a `.d.ts` File:** Inside `@types`, create a new file, such as `fvtt-types-config.d.ts`. This file will hold all the type declarations required by Foundry’s API, making it easier to manage and modify type settings as needed.
-. **Register Your Ambient Types in `tsconfig.json`:** Once your `.d.ts` file is ready, you need to add the `@types` folder to your TypeScript configuration file so the compiler knows where to locate these types. Open your `tsconfig.json` file, and within the `"include"` or `"typeRoots"` field, specify the path to the `@types` folder:
-
-[source,json]
-----
-{
-  "compilerOptions": {
-    ...
-  },
-  "include": [
-    "./@types/**/*",
-    ...
-  ]
-}
-----
-
-== Working with FVTT-Types
-
-=== Installing FVTT-Types
-
-=== Declaration Merging
-
-very long article, needs some updating - link:https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/A-Quick-Guide-to-Declaration-Merging
-
-=== InterfaceToObject
-
-== Configuring Your Documents
-
-=== Configuring Document Subclasses
-
-==== DocumentClassConfig
-
-=== Configuring Document Schemas
-
-==== DataModelConfig
-
-==== SourceConfig & DataConfig
-
-##### Generic Types for Document Subclasses
-
-[source,typescript]
-----
-class K4Actor<Type extends K4ActorType = K4ActorType> extends Actor {
-  declare type: Type;
-  declare system: K4Actor.System<Type>;
-}
-----
-
-=== Configuring Document Flags
-
-==== FlagConfig
-
-very short article - link:https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/Flags
-
-== Configuring Your Settings
-
-=== SettingsConfig
-
-link:https://github.com/League-of-Foundry-Developers/foundry-vtt-types/wiki/Settings
-
-== Hooks & Game Readiness
-
-=== Foundry Initialization Hooks
-
-==== AssumeHookRan
-
-=== Defining Custom Hooks
-
-== Defining Your API
-
-=== Exposing Functionality via `game.module`
-
-==== ModuleConfig
-
-=== Defining Required Modules
-
-==== RequiredModules
-
-== Accessing Foundry's Built-In Libraries
-
-=== `system.json`/`module.json` Configuration
-
-=== Dynamic Imports
-
-==== Example: GreenSock Animation Platform ("GSAP")
-
-== Popular Third-Party Modules
-
-=== Modules with Available Type Support
-
-"FVTT-Types includes full TypeScript definitions for several of the most popular modules used by system and module developers, including ..."
-
-also: And then I'll add another line clarifying that this doesn't mean other modules aren't available, just that the type definitions aren't.  I'll want to word that carefully so it doesn't imply users shouldn't use modules that don't have available types, though.
-
-==== `socketlib`: Synchronizing Data Between Clients
-
-==== `libWrapper`: A Wrapper Around One or More Libs
-
-=== Generating Types for Other Modules
-
-"if a module is written in TypeScript, you can extract the types and integrate them into your system by ..."
-
-[source,bash]
-----
-tsc --noEmit false --emitDeclarationOnly --outDir types
-----
-
-then move them into @types and import them in index.d.ts
-
-== Acknowledgments
-
-Originally forked from link:https://gitlab.com/foundry-projects/foundry-pc/foundry-pc-types[Foundry Project Creator Types]
-by link:https://gitlab.com/NvanOosten[@NickEastNL]
-
-== Contributing
-
-Contributions are very welcome in order to decrease the individual workload. Filing issues for wrong / missing types is
-also a great way to help us improve the type definitions.
-
-Development on the current version of Foundry VTT is done on the `main` branch. Additionally, we keep branches for the
-older version of Foundry VTT that we still support. These branches are named according to the Foundry VTT version they
-correspond to. For example, the branch for Foundry VTT 0.8 is called `foundry-0.8.x`. All work to improve the type
-definitions needs to be done through Pull Requests to the relevant branch.
-
-Please read link:CONTRIBUTING.md[CONTRIBUTING.md] for more details on how to contribute.
-
-If you have any specific questions, feel free to contact us in the
-link:https://discord.gg/52DNPzqm2Z[League of Extraordinary Foundry Developers Discord].
-
-== Type-Checking, Linting, Testing
-
-When contributing, make sure that the type checks pass, the linter is green and the tests are green. We _do_ have
-checks in the CI but running this locally also helps you while developing and saves you time as you don't have to wait
-for the CI.
-
-You can run type checking and linting with the following command:
-
-[source,shell]
-----
-npm run lint
-----
-
-You can run the tests with
-
-[source,shell]
-----
-npm run test
-----
-
-== Creating a release
-
-To create a release, you have to create a new release commit, tag it and create a GitHub release from that. The CI will
-handle the rest.
-
-[source,shell]
-----
-npm version <release-type>
-git push --follow-tags
-----
-
-== License
-
-This project is licensed under the MIT license. You can find a copy at link:LICENSE[LICENSE].
