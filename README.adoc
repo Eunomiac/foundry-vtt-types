@@ -194,7 +194,7 @@ forceConsistentCasingInFileNames:: Ensures that casing in imported files must ex
 +
 Setting this to *true* prevents bugs that could occur when your project runs on case-sensitive systems. _(This is especially important if anyone contributing to your project develops on Windows where imports _are_ case insensitive because your users might be running Foundry on Linux, where `MyFile.ts` and `myfile.ts` are treated as different files.)_
 
-resolveJsonModule:: Allows you to import JSON files directly as modules.
+resolveJsonModule:: Allows importing JSON files directly for automatic types.
 +
 Setting this to *true* enables proper typing for your project's JSON files. _(This is particularly useful for working with your module.json manifest file and any data templates you create, ensuring type safety when accessing their contents.)_
 
