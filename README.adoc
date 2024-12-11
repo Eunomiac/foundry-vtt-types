@@ -13,11 +13,7 @@ a|image::https://img.shields.io/discord/732325252788387980?label=League%20of%20E
 
 These type definitions enable full TypeScript type checking for Foundry API versions *12* and *13*.
 This guide will walk you through setting up your Foundry project to use TypeScript with the `foundry-vtt-types` type definitions.
-
-[NOTE]
-====
-This guide uses the word "project" to refer to the Foundry system or module you're working on.
-====
+Whether you are writing a system, a module, or simply a macro this guide can be useful to you if you want to use TypeScript during development.
 
 If you are unfamiliar with TypeScript, start here:
 
@@ -50,27 +46,6 @@ This is a *highly opinionated* guide. It is not intended to provide you with a c
 
 == 1. Configuring Your Project to Use TypeScript
 
-=== Installing the TypeScript Compiler
-
-TypeScript is a language designed for developers, meaning it must be compiled into plain JavaScript before Foundry VTT can execute it.
-
-To get started, you'll need to install the TypeScript compiler.
-The easiest way to do this is via link:https://nodejs.org/en/download/package-manager[Node.js] and its package manager, `npm`. If you don’t already have Node.js installed, download and install it from the provided link. Then, open your terminal and run the following command:
-
-[source,console]
-----
-npm install -g typescript
-----
-
-To confirm the installation, you can check the compiler version by running:
-
-[source,console]
-----
-tsc --version
-----
-
-This should display the version number of TypeScript, indicating it has been installed globally.
-
 === Initializing Your Project with `npm`
 
 Ensure your project is properly set up for Node.js and `npm` (i.e. it has a `package.json` file).
@@ -83,9 +58,30 @@ npm init
 
 This command will guide you through creating a `package.json` file. You can accept the default values or customize them as needed for your project.
 
+=== Installing TypeScript
+
+TypeScript is a language that compiles into JavaScript. This means before Foundry VTT can execute it must be compiled into plain JavaScript.
+
+To get started, you'll need to install the TypeScript compiler.
+The easiest way to do this is via link:https://nodejs.org/en/download/package-manager[Node.js] and its package manager, `npm`. If you don't already have Node.js installed, download and install it from the provided link. Then, open your terminal and run the following command:
+
+[source,console]
+----
+npm add --include=dev typescript
+----
+
+To confirm the installation, you can check the compiler version by running:
+
+[source,console]
+----
+npx tsc --version
+----
+
+This should display the version number of TypeScript, indicating it has been installed in your project successfully.
+
 === Organizing Your Files and Folders
 
-Once your npm project is set up, organize your project with the following folder structure. Just create the folders at this point; I've included files we'll be using later in the guide for reference, but you don't need to worry about them yet:
+Once your npm project is set up, organize your project with the following folder structure. Just create the folders at this point; this guide includes files that will be used later for reference that you don't need to worry about them yet:
 
 [listing]
 ----
@@ -112,7 +108,7 @@ my-typescript-project
 └── vite.config.ts
 ----
 <1> After Vite compiles and builds your project, the `dist` folder will contain your final system or module in its entirety _(i.e. what you'll actually distribute to users)_.
-<2> The `static` folder contains project files that don't require any compiling or processing before they are used, such as images, fonts, localization files, Handlebars templates, etc. These files will be copied to the `dist` folder as-is during the build process. _(I've included a few examples, which may or may not be relevant to your project.)_
+<2> The `static` folder contains project files that don't require any compiling or processing before they are used, such as images, fonts, localization files, Handlebars templates, etc. These files will be copied to the `dist` folder as-is during the build process. _(A few examples have been included, which may or may not be relevant to your project.)_
 <3> Conversely, the `src` folder contains files that need processing before they can be used, such as TypeScript files that must be compiled to JavaScript and SCSS files that must be compiled to CSS.
 
 == 2. Configuring TypeScript to Use `foundry-vtt-types`
@@ -180,7 +176,7 @@ Setting this to *true* prevents the TypeScript compiler from creating actual Jav
 
 target:: Specifies which JavaScript version your TypeScript code should be converted to. By default, TypeScript targets older versions of JavaScript for maximum compatibility.
 +
-Setting this to *"ES2023"* allows you to use modern JavaScript features that Foundry supports.
+Since Foundy itself uses very modern features, setting this to *"ES2023"* aligns with Foundry.
 
 outDir:: Specifies where compiled JavaScript files should be placed relative to your source TypeScript files.
 +
@@ -194,11 +190,11 @@ verbatimModuleSyntax:: Controls how TypeScript preserves your module import and 
 +
 Setting this to *true* ensures your imports work exactly as written. _(This is particularly important when working with Foundry's module system, as unexpected transformations of import statements can cause hard-to-debug runtime errors.)_
 
-forceConsistentCasingInFileNames:: Ensures that when you import files, the casing in your import statement must exactly match the actual filename. For example, `import "./MyFile"` won't work if the file is actually named `myfile.ts`.
+forceConsistentCasingInFileNames:: Ensures that casing in imported files must exactly match the actual filename. For example, `import "./MyFile"` won't work if the file is actually named `myfile.ts`.
 +
-Setting this to *true* prevents bugs that could occur when your project runs on case-sensitive systems. _(This is especially important if you're developing on Windows but your users might be running Foundry on Linux, where `MyFile.ts` and `myfile.ts` are treated as different files.)_
+Setting this to *true* prevents bugs that could occur when your project runs on case-sensitive systems. _(This is especially important if anyone contributing to your project develops on Windows where imports _are_ case insensitive because your users might be running Foundry on Linux, where `MyFile.ts` and `myfile.ts` are treated as different files.)_
 
-resolveJsonModule:: Allows you to import JSON files directly as modules.
+resolveJsonModule:: Allows importing JSON files directly for automatic types.
 +
 Setting this to *true* enables proper typing for your project's JSON files. _(This is particularly useful for working with your module.json manifest file and any data templates you create, ensuring type safety when accessing their contents.)_
 
@@ -213,17 +209,17 @@ Setting this to *true* enables all of the following:
 * `strictPropertyInitialization`: Makes sure you properly initialize class properties _(helpful when extending Foundry's document classes)_
 * `noImplicitThis`: Prevents confusion about what `this` refers to _(particularly important in Foundry's hook callbacks)_
 
-noUncheckedIndexedAccess:: Requires you to verify that array elements or object properties exist before using them.
+noUncheckedIndexedAccess:: Requires you to verify that array elements or dynamic object properties are defined before using them. For some values, there are any number of dynamic keys that could be defined at runtime. For example, because an array of strings could contain any number of strings at runtime, TypeScript will assume that the type of element `stringArray[632]` is always defined and type it as `string`.
 +
-Setting this to *true* forces you to check whether a value accessed from an array or object exists (i.e. is not `undefined`) before you attempt to use it. This prevents runtime errors when accessing dynamic Foundry data like `actor.items[0]` or `token.data.flags["my-module"]`, which might not always exist.
+Setting this to true prevents TypeScript from making this assumption, by resolving the type of `stringArray[632]` to `string | undefined` instead of `string`. This requires you to confirm the element really is defined before you attempt to use it, preventing runtime errors when accessing dynamic Foundry data like `actor.items[32]` which might not always exist.
 
-noUncheckedSideEffectImports:: Ensures TypeScript resolves all import paths, even if they don't import anything that requires type-checking. By default, TypeScript will ignore imports that don't resolve to any values (i.e. files imported for their top-level "side effects", like registering hooks or defining properties in the global scope).
-+
-Setting this to *true* ensures all imports must resolve correctly, improving code reliability.
+noUncheckedSideEffectImports:: Ensures TypeScript validates the path of every import statement. By default, TypeScript validates import paths only when explicit values or types are being imported. This means that while imports like `import { foo } from "./foo/bar"` are checked, imports like `import "./lorem/ipsum"` are not.
+
+Setting this to true ensures all imports must exist, improving code reliability.
 
 useUnknownInCatchVariables:: Makes error variables in catch blocks have type `unknown` instead of `any`, requiring you to verify what kind of error you caught before working with it.
 +
-Setting this to *true* ensures safer error handling by preventing you from assuming properties exist on caught errors without checking first.
+Setting this to *true* ensures safer error handling by preventing you from accidentally misusing the error, such as assuming a certain property exists. The type cannot be more specific because in JavaScript it's possible to throw any value, e.g. `throw "foo bar";` and `throw 1;`. To check if it's an `Error` you will have to check with `if (err instanceof Error)`.
 
 noImplicitOverride:: Requires explicit marking of methods that override their base class.
 +
