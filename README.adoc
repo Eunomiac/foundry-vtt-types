@@ -213,7 +213,7 @@ noUncheckedIndexedAccess:: Adds `undefined` to types with index signatures. Inde
 +
 Setting this to *true* forces you to check whether a value accessed from an array or object exists (i.e. is not `undefined`) before you attempt to use it. This prevents runtime errors when accessing dynamic Foundry data like `actor.items[0]` or `token.data.flags["my-module"]`, which might not always exist.
 
-noUncheckedSideEffectImports:: Ensures TypeScript resolves all import paths, even if they don't import anything that requires type-checking. By default, TypeScript will ignore imports that don't resolve to any values (i.e. files imported for their top-level "side effects", like registering hooks or defining properties in the global scope).
+noUncheckedSideEffectImports:: Ensures TypeScript does not silently allow invalid import paths when no values or types are imported from it. For example `import "./foo/bar";` would not error if that path does not really exist but `import { foo } from "./foo/bar";` would.
 +
 Setting this to *true* ensures all imports must resolve correctly, improving code reliability.
 
