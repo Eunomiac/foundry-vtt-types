@@ -219,7 +219,7 @@ Setting this to *true* ensures all imports must resolve correctly, improving cod
 
 useUnknownInCatchVariables:: Makes error variables in catch blocks have type `unknown` instead of `any`, requiring you to verify what kind of error you caught before working with it.
 +
-Setting this to *true* ensures safer error handling by preventing you from assuming properties exist on caught errors without checking first.
+Setting this to *true* ensures safer error handling by preventing you from accidentally misusing the error, such as assuming a certain property exists. The type cannot be more specific because in JavaScript it's possible to throw any value, e.g. `throw "foo bar";` and `throw 1;`. To check if it's an `Error` you will have to check with `if (err instanceof Error)`.
 
 noImplicitOverride:: Requires explicit marking of methods that override their base class.
 +
