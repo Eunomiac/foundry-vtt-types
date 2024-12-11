@@ -192,7 +192,7 @@ Setting this to *#true#* ensures your imports work exactly as written. _(This is
 
 forceConsistentCasingInFileNames:: Ensures that casing in imported files must exactly match the actual filename. For example, `import "./MyFile"` won't work if the file is actually named `myfile.ts`.
 +
-Setting this to *#true#* prevents bugs that could occur when your project runs on case-sensitive systems. _(This is especially important if anyone contributing to your project develops on Windows where imports _are_ case insensitive because your users might be running Foundry on Linux, where `MyFile.ts` and `myfile.ts` are treated as different files.)_
+Setting this to *#true#* prevents bugs that could occur when your project runs on case-sensitive systems. _(This is especially important if anyone contributing to your project develops on Windows where imports_ are _case insensitive, because your users might be running Foundry on Linux, where `MyFile.ts` and `myfile.ts` are treated as different files.)_
 
 resolveJsonModule:: Allows importing JSON files directly for automatic types.
 +
