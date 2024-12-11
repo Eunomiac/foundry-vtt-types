@@ -209,13 +209,13 @@ Setting this to *true* enables all of the following:
 * `strictPropertyInitialization`: Makes sure you properly initialize class properties _(helpful when extending Foundry's document classes)_
 * `noImplicitThis`: Prevents confusion about what `this` refers to _(particularly important in Foundry's hook callbacks)_
 
-noUncheckedIndexedAccess:: Adds `undefined` to types with index signatures. Index signatures are like catch-alls for particular shapes of keys. For example an array in TypeScript will allow expressions like `arr[10]` because that key may exist at runtime. However with `noUncheckedIndexedAccess` set to false (the default) the resulting types will not include `undefined` even though at runtime such a key may not exist.
+noUncheckedIndexedAccess:: Requires you to verify that array elements or dynamic object properties are defined before using them. For some values, there are any number of dynamic keys that could be defined at runtime. For example, because an array of strings could contain any number of strings at runtime, TypeScript will assume that the type of element `stringArray[632]` is always defined and type it as `string`.
 +
-Setting this to *true* forces you to check whether a value accessed from an array or object exists (i.e. is not `undefined`) before you attempt to use it. This prevents runtime errors when accessing dynamic Foundry data like `actor.items[0]` or `token.data.flags["my-module"]`, which might not always exist.
+Setting this to true prevents TypeScript from making this assumption, by resolving the type of `stringArray[632]` to `string | undefined` instead of `string`. This requires you to confirm the element really is defined before you attempt to use it, preventing runtime errors when accessing dynamic Foundry data like `actor.items[32]` which might not always exist.
 
-noUncheckedSideEffectImports:: Ensures TypeScript does not silently allow invalid import paths when no values or types are imported from it. For example `import "./foo/bar";` would not error if that path does not really exist but `import { foo } from "./foo/bar";` would.
-+
-Setting this to *true* ensures all imports must resolve correctly, improving code reliability.
+noUncheckedSideEffectImports:: Ensures TypeScript validates the path of every import statement. By default, TypeScript validates import paths only when explicit values or types are being imported. This means that while imports like `import { foo } from "./foo/bar"` are checked, imports like `import "./lorem/ipsum"` are not.
+
+Setting this to true ensures all imports must exist, improving code reliability.
 
 useUnknownInCatchVariables:: Makes error variables in catch blocks have type `unknown` instead of `any`, requiring you to verify what kind of error you caught before working with it.
 +
