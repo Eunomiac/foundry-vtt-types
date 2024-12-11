@@ -209,7 +209,7 @@ Setting this to *true* enables all of the following:
 * `strictPropertyInitialization`: Makes sure you properly initialize class properties _(helpful when extending Foundry's document classes)_
 * `noImplicitThis`: Prevents confusion about what `this` refers to _(particularly important in Foundry's hook callbacks)_
 
-noUncheckedIndexedAccess:: Requires you to verify that array elements or object properties exist before using them.
+noUncheckedIndexedAccess:: Adds `undefined` to types with index signatures. Index signatures are like catch-alls for particular shapes of keys. For example an array in TypeScript will allow expressions like `arr[10]` because that key may exist at runtime. However with `noUncheckedIndexedAccess` set to false (the default) the resulting types will not include `undefined` even though at runtime such a key may not exist.
 +
 Setting this to *true* forces you to check whether a value accessed from an array or object exists (i.e. is not `undefined`) before you attempt to use it. This prevents runtime errors when accessing dynamic Foundry data like `actor.items[0]` or `token.data.flags["my-module"]`, which might not always exist.
 
