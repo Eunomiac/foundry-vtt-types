@@ -214,7 +214,7 @@ noUncheckedIndexedAccess:: Requires you to verify that array elements or dynamic
 Setting this to true prevents TypeScript from making this assumption, by resolving the type of `stringArray[632]` to `string | undefined` instead of `string`. This requires you to confirm the element really is defined before you attempt to use it, preventing runtime errors when accessing dynamic Foundry data like `actor.items[32]` which might not always exist.
 
 noUncheckedSideEffectImports:: Ensures TypeScript validates the path of every import statement. By default, TypeScript validates import paths only when explicit values or types are being imported. This means that while imports like `import { foo } from "./foo/bar"` are checked, imports like `import "./lorem/ipsum"` are not.
-
++
 Setting this to true ensures all imports must exist, improving code reliability.
 
 useUnknownInCatchVariables:: Makes error variables in catch blocks have type `unknown` instead of `any`, requiring you to verify what kind of error you caught before working with it.
