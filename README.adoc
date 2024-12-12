@@ -219,7 +219,7 @@ Setting this to *#true#* ensures all imports must exist, improving code reliabil
 
 link:https://www.typescriptlang.org/tsconfig/#useUnknownInCatchVariables[useUnknownInCatchVariables]:: Makes the error parameter of `catch` blocks have type `unknown` instead of `any`, requiring you to verify what kind of error you caught before working with it.
 +
-Setting this to *#true#* prevents you from assuming the error parameter is an instance of `Error`. In JavScript, it's possible to throw any value, e.g. `throw "foo bar";` and `throw 1;`. You will need to verify the type of the error before working with it (e.g. `if (error instanceof Error) { ... }`).
+Setting this to *#true#* prevents you from assuming the error parameter is an instance of `Error` (or any other type). In JavScript, it's possible to throw any value, e.g. `throw "foo bar";` and `throw 1;`. You will need to verify the type of the error before working with it (e.g. `if (error instanceof Error) { ... }`).
 
 link:https://www.typescriptlang.org/tsconfig/#noImplicitOverride[noImplicitOverride]:: Requires explicit marking of methods that override their base class.
 +
