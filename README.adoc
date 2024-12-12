@@ -150,78 +150,78 @@ If you'd like to dig a bit deeper into what each of these settings do, read on:
 [%collapsible]
 ====
 [horizontal]
-$schema:: Points to the official JSON Schema definition for TypeScript configuration files. This enables better editor support, including autocompletion and validation of your `tsconfig.json` settings.
+link:https://json.schemastore.org/tsconfig.json[$schema]:: Points to the official JSON Schema definition for TypeScript configuration files. This enables better editor support, including autocompletion and validation of your `tsconfig.json` settings.
 +
 Setting this to *#"https://json.schemastore.org/tsconfig.json"#* helps catch configuration errors and provides inline documentation.
 
-allowImportingTsExtensions:: Controls whether you can use TypeScript-specific extensions (like `.ts`) in import statements. By default, TypeScript expects you to either omit the extension or use `.js` extensions (e.g., `import "./myFile"` or `import "./myFile.js"`), even when importing from `.ts` files.
+link:https://www.typescriptlang.org/tsconfig/#allowImportingTsExtensions[allowImportingTsExtensions]:: Controls whether you can use TypeScript-specific extensions (like `.ts`) in import statements. By default, TypeScript expects you to either omit the extension or use `.js` extensions (e.g., `import "./myFile"` or `import "./myFile.js"`), even when importing from `.ts` files.
 +
 Setting this to *#true#* enables importing with `.ts` extensions. _(This works together with Vite's build process - Vite knows how to handle these TypeScript imports and will ensure they work correctly in the final JavaScript bundle.)_
 
-esModuleInterop:: Smooths out differences between how different module systems handle imports and exports. By default, TypeScript applies stricter rules that can cause compatibility issues.
+link:https://www.typescriptlang.org/tsconfig/#esModuleInterop[esModuleInterop]:: Smooths out differences between how different module systems handle imports and exports. By default, TypeScript applies stricter rules that can cause compatibility issues.
 +
 Setting this to *#true#* helps prevent problems when importing libraries. _(While Foundry uses ES Modules, some older libraries you might need could use different formats. This setting helps them work together seamlessly.)_
 
-allowSyntheticDefaultImports:: Controls whether you can use simplified import syntax for modules that don't explicitly define default exports, which includes many Foundry API features.
+link:https://www.typescriptlang.org/tsconfig/#allowSyntheticDefaultImports[allowSyntheticDefaultImports]:: Controls whether you can use simplified import syntax for modules that don't explicitly define default exports, which includes many Foundry API features.
 +
 Setting this to *#false#* ensures your imports match Foundry's module structure exactly, preventing subtle runtime errors.
 
-module:: Determines how TypeScript generates JavaScript module code from your source files. By default, TypeScript uses CommonJS style modules.
+link:https://www.typescriptlang.org/tsconfig/#module[module]:: Determines how TypeScript generates JavaScript module code from your source files. By default, TypeScript uses CommonJS style modules.
 +
 Setting this to *#"Node16"#* is necessary for certain internal imports in `foundry-vtt-types` to work. Future updates may change this requirement.
 
-noEmit:: Controls whether TypeScript should prevent ("no emit") the generation of JavaScript files during compilation.
+link:https://www.typescriptlang.org/tsconfig/#noEmit[noEmit]:: Controls whether TypeScript should prevent ("no emit") the generation of JavaScript files during compilation.
 +
 Setting this to *#true#* prevents the TypeScript compiler from creating actual JavaScript files when it is run. _(This may seem counterproductive, but as you'll soon see, we'll be using Vite to create the final JavaScript for your project, rather than the TypeScript compiler directly.)_
 
-target:: Specifies which JavaScript version your TypeScript code should be converted to. By default, TypeScript targets older versions of JavaScript for maximum compatibility.
+link:https://www.typescriptlang.org/tsconfig/#target[target]:: Specifies which JavaScript version your TypeScript code should be converted to. By default, TypeScript targets older versions of JavaScript for maximum compatibility.
 +
 Since Foundy itself uses very modern features, setting this to *#"ES2023"#* aligns with Foundry.
 
-outDir:: Specifies where compiled JavaScript files should be placed relative to your source TypeScript files.
+link:https://www.typescriptlang.org/tsconfig/#outDir[outDir]:: Specifies where compiled JavaScript files should be placed relative to your source TypeScript files.
 +
 Setting this to *#"dist"#* ensures that your compiled JavaScript is placed in the `dist` folder, which aligns with the file structure described above.
 
-types:: Lists any additional type definition packages that should be included globally in your project. By default, TypeScript automatically includes all `@types` packages it can find in `node_modules`.
+link:https://www.typescriptlang.org/tsconfig/#types[types]:: Lists any additional type definition packages that should be included globally in your project. By default, TypeScript automatically includes all `@types` packages it can find in `node_modules`.
 +
 Setting this to an *#empty array#* prevents automatic type inclusion. _(This might seem strange, but we'll be explicitly importing the Foundry types we need, which gives us better control and prevents conflicts between different type definition packages.)_
 
-verbatimModuleSyntax:: Controls how TypeScript preserves your module import and export statements. This setting prevents TypeScript from rewriting your import/export syntax.
+link:https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax[verbatimModuleSyntax]:: Controls how TypeScript preserves your module import and export statements. This setting prevents TypeScript from rewriting your import/export syntax.
 +
 Setting this to *#true#* ensures your imports work exactly as written. _(This is particularly important when working with Foundry's module system, as unexpected transformations of import statements can cause hard-to-debug runtime errors.)_
 
-forceConsistentCasingInFileNames:: Ensures that casing in imported files must exactly match the actual filename. For example, `import "./MyFile"` won't work if the file is actually named `myfile.ts`.
+link:https://www.typescriptlang.org/tsconfig/#forceConsistentCasingInFileNames[forceConsistentCasingInFileNames]:: Ensures that casing in imported files must exactly match the actual filename. For example, `import "./MyFile"` won't work if the file is actually named `myfile.ts`.
 +
 Setting this to *#true#* prevents bugs that could occur when your project runs on case-sensitive systems. _(This is especially important if anyone contributing to your project develops on Windows where imports_ are _case insensitive, because your users might be running Foundry on Linux, where `MyFile.ts` and `myfile.ts` are treated as different files.)_
 
-resolveJsonModule:: Allows importing JSON files directly for automatic types.
+link:https://www.typescriptlang.org/tsconfig/#resolveJsonModule[resolveJsonModule]:: Allows importing JSON files directly for automatic types.
 +
 Setting this to *#true#* enables proper typing for your project's JSON files. _(This is particularly useful for working with your module.json manifest file and any data templates you create, ensuring type safety when accessing their contents.)_
 
-strict:: Enables TypeScript's complete set of strict type checking options. By default, these strict checks are disabled.
+link:https://www.typescriptlang.org/tsconfig/#strict[strict]:: Enables TypeScript's complete set of strict type checking options. By default, these strict checks are disabled.
 +
 Setting this to *#true#* enables all of the following:
 +
-* `noImplicitAny`: Requires you to explicitly declare your types. By default, TypeScript will infer the `any` type for any variable that doesn't have an explicit type declaration. This is risky because the `any` type bypasses all type checking, potentially leading to runtime errors. Explicit type declarations enhance code safety and maintainability.
-* `strictNullChecks`: Forces you to handle cases where values might be `null` _(common when working with optional document fields)_
-* `strictFunctionTypes`: Makes sure your function parameters match exactly _(important when implementing Foundry's interfaces)_
-* `strictBindCallApply`: Ensures correct typing when using JavaScript's function methods _(especially relevant when working with event handlers)_
-* `strictPropertyInitialization`: Makes sure you properly initialize class properties _(helpful when extending Foundry's document classes)_
-* `noImplicitThis`: Prevents confusion about what `this` refers to _(particularly important in Foundry's hook callbacks)_
+* link:https://www.typescriptlang.org/tsconfig/#noImplicitAny[`noImplicitAny`]: Requires you to explicitly declare your types. By default, TypeScript will infer the `any` type for any variable that doesn't have an explicit type declaration. This is risky because the `any` type bypasses all type checking, potentially leading to runtime errors. Explicit type declarations enhance code safety and maintainability.
+* link:https://www.typescriptlang.org/tsconfig/#strictNullChecks[`strictNullChecks`]: Forces you to handle cases where values might be `null` _(common when working with optional document fields)_
+* link:https://www.typescriptlang.org/tsconfig/#strictFunctionTypes[`strictFunctionTypes`]: Makes sure your function parameters match exactly _(important when implementing Foundry's interfaces)_
+* link:https://www.typescriptlang.org/tsconfig/#strictBindCallApply[`strictBindCallApply`]: Ensures correct typing when using JavaScript's function methods _(especially relevant when working with event handlers)_
+* link:https://www.typescriptlang.org/tsconfig/#strictPropertyInitialization[`strictPropertyInitialization`]: Makes sure you properly initialize class properties _(helpful when extending Foundry's document classes)_
+* link:https://www.typescriptlang.org/tsconfig/#noImplicitThis[`noImplicitThis`]: Prevents confusion about what `this` refers to _(particularly important in Foundry's hook callbacks)_
 
-noUncheckedIndexedAccess:: Requires you to verify that array elements or dynamic object properties are defined before using them. For some values, there are any number of dynamic keys that could be defined at runtime. For example, because an array of strings could contain any number of strings at runtime, TypeScript will assume that the type of element `stringArray[632]` is always defined and type it as `string`.
+link:https://www.typescriptlang.org/tsconfig/#noUncheckedIndexedAccess[noUncheckedIndexedAccess]:: Requires you to verify that array elements or dynamic object properties are defined before using them. For some values, there are any number of dynamic keys that could be defined at runtime. For example, because an array of strings could contain any number of strings at runtime, TypeScript will assume that the type of element `stringArray[632]` is always defined and type it as `string`.
 +
 Setting this to *#true#* prevents TypeScript from making this assumption, by resolving the type of `stringArray[632]` to `string | undefined` instead of `string`. This requires you to confirm the element really is defined before you attempt to use it, preventing runtime errors when accessing dynamic Foundry data like `actor.items[32]` which might not always exist.
 
-noUncheckedSideEffectImports:: Ensures TypeScript validates the path of every import statement. By default, TypeScript validates import paths only when explicit values or types are being imported. This means that while imports like `import { foo } from "./foo/bar"` are checked, imports like `import "./lorem/ipsum"` are not.
+link:https://www.typescriptlang.org/tsconfig/#noUncheckedSideEffectImports[noUncheckedSideEffectImports]:: Ensures TypeScript validates the path of every import statement. By default, TypeScript validates import paths only when explicit values or types are being imported. This means that while imports like `import { foo } from "./foo/bar"` are checked, imports like `import "./lorem/ipsum"` are not.
 +
 Setting this to *#true#* ensures all imports must exist, improving code reliability.
 
-useUnknownInCatchVariables:: Makes error variables in catch blocks have type `unknown` instead of `any`, requiring you to verify what kind of error you caught before working with it.
+link:https://www.typescriptlang.org/tsconfig/#useUnknownInCatchVariables[useUnknownInCatchVariables]:: Makes error variables in catch blocks have type `unknown` instead of `any`, requiring you to verify what kind of error you caught before working with it.
 +
 Setting this to *#true#* ensures safer error handling by preventing you from accidentally misusing the error, such as assuming a certain property exists. The type cannot be more specific because in JavaScript it's possible to throw any value, e.g. `throw "foo bar";` and `throw 1;`. To check if it's an `Error` you will have to check with `if (err instanceof Error)`.
 
-noImplicitOverride:: Requires explicit marking of methods that override their base class.
+link:https://www.typescriptlang.org/tsconfig/#noImplicitOverride[noImplicitOverride]:: Requires explicit marking of methods that override their base class.
 +
 Setting this to *#true#* makes overrides more explicit, ensuring you never accidentally override a base class without realizing it.
 ====
