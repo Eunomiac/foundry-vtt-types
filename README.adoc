@@ -97,11 +97,10 @@ my-typescript-project
 │   ├── templates
 │   └── system.json          // (or module.json)
 ├── src                     <3>
-│   ├── ts
-│   ├── scss
-│   ├── index.js
-│   ├── index.html
-│   └── style.css
+│   ├── module
+│   │   └── my-typescript-project.ts
+│   └── styles
+│       └── my-typescript-project.scss
 ├── package.json
 ├── README.md
 ├── tsconfig.json
