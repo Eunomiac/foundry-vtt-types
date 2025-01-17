@@ -228,3 +228,149 @@ Setting this to *#true#* makes overrides more explicit, ensuring you never accid
 === Installing `foundry-vtt-types`
 
 _(TODO)_
+
+== The v12 `DataModel` System
+
+=== Schemas
+A "schema" is a description a data object, such as `actor.system`. It describes the keys and the types of values that can be assigned to those keys. In TypeScript, one would generally describe a schema with an `interface`:
+```typescript
+interface ActorSchemaHero {
+	attributes: {
+		strength: number,
+		dexterity:  number,
+		constitution:  number
+		intelligence:  number
+		wisdom:  number
+		charisma:  number
+	}
+}
+```
+But Foundry v12 has introduced a much more powerful and robust way to define the structure of such data: the `DataModel`.
+
+=== DataModels
+It's beyond the scope of this guide to describe all of the features of this new infrastructure, but there's a great introduction <here>, and you can review the API documentation <here>. You'll learn how to define a `DataModel` for each of your Document types, looking something like this:
+```javascript
+class ActorDataModelHero extends TypeDataModel {
+  defineSchema() {
+    return {
+      attributes: new fields.SchemaField({
+        strength: new fields.NumberField({min: 3, max: 25, initial: 8},
+        dexterity: new fields.NumberField({min: 3, max: 25, initial: 8},
+        constitution: new fields.NumberField({min: 3, max: 25, initial: 8},
+        intelligence: new fields.NumberField({min: 3, max: 25, initial: 8},
+        wisdom: new fields.NumberField({min: 3, max: 25, initial: 8},
+        charisma: new fields.NumberField({min: 3, max: 25, initial: 8}
+      })
+    }
+  }
+}
+```
+Follow these steps to configure TypeScript to understand your DataModels:
+
+=== 1. Define Your Schemas Separately
+In the above example, the schema describing the keys and values of `ActorDataModelHero` is returned directly by the `defineSchema` method. TypeScript needs to know what this looks like in advance, though, so you'll need to define your _schemas_ in advance:
+```javascript
+const ActorSchemaHero = {
+  attributes: new fields.SchemaField({
+	strength: new fields.NumberField({min: 3, max: 25, initial: 8},
+	dexterity: new fields.NumberField({min: 3, max: 25, initial: 8},
+	constitution: new fields.NumberField({min: 3, max: 25, initial: 8},
+	intelligence: new fields.NumberField({min: 3, max: 25, initial: 8},
+	wisdom: new fields.NumberField({min: 3, max: 25, initial: 8},
+	charisma: new fields.NumberField({min: 3, max: 25, initial: 8}
+  }
+};
+
+class ActorDataModelHero extends TypeDataModel {
+  defineSchema() {
+    return ActorSchemaHero;
+  }
+}
+```
+### 2. Define Your DataModel Class with Type Parameters
+Now let's add the TypeScript. To tell TypeScript all it needs to know about your Documents, the `TypeDataModel` class has been extended to accept parameters, much like a function, that you pass your type information through:
+```
+class ActorDataModelHero extends TypeDataModel<
+  typeof ActorSchemaHero, <1>
+  Actor.ConfiguredInstance <2>
+> {
+  override defineSchema() {
+    return ActorSchemaHero;
+  }
+}
+```
+<1> a reference to the schema you defined in step 1
+<2> a helper type that points to whatever Actor subclass you configured Foundry to use via (??? quick check of that step ???)
+
+### 3. Describe Any `prepareDerivedData` Changes
+The `prepareDerivedData` method is often used to augment or modify the `system` data with values that can be easily calculated, rather than storing this data server-side. If you do this, you need to tell TypeScript how the `system` object will look after you've modified it. This is done by passing a simple `interface` as the _fourth_ (not third, see below) parameter to the `TypeDataModel` class:
+```
+interface ActorDerivedSchemaHero {
+  attributeModifiers: {
+    strength: number,
+    dexterity: number,
+    constitution: number,
+    intelligence: number,
+    wisdom: number,
+    charisma: number
+  }
+}
+
+class ActorDataModelHero extends TypeDataModel<
+  typeof ActorSchemaHero,
+  Actor.ConfiguredInstance,
+  EmptyObject, <3>
+  ActorDerivedSchemaHero <4>
+> {
+  override defineSchema() { return ActorSchemaHero; }
+
+  override prepareDerivedData() {
+    this.attributeModifiers = {
+	  strength: Math.floor((this.attributes.strength - 10) / 2)
+      /* ... */
+    }
+  }
+}
+```
+<3> This third parameter is `EmptyObject`. Don't ask, it just is.
+<4> the fourth parameter is where you tell TypeScript what `system` looks like after `prepareDerivedData`.
+
+=== 4. Assign Your DataModels to the FVTT-TYPES Configuration
+
+_(TODO)_
+
+== Type-Specific DataModels
+The next step is to make sure TypeScript can differentiate between the types of your Documents, since each Document `type` can have its own unique schema.  The easiest way to do this is by creating a simple type assertion method for each of your types in your main Document class.
+
+For example, say your `MyActor` class could have one of three different values for `type`: "hero", "villain" or "minion". You will have already created a different DataModel for each type:
+```typescript
+class MyActorDataModelHero extends TypeDataModel<typeof MyActorSchemaHero, Actor.ConfiguredInstance> {
+  override defineSchema() { return MyActorSchemaHero; }
+}
+class MyActorDataModelVillain extends TypeDataModel<typeof MyActorSchemaVillain, Actor.ConfiguredInstance> {
+  override defineSchema() { return MyActorSchemaVillain; }
+}
+class MyActorDataModelMinion extends TypeDataModel<typeof MyActorSchemaMinion, Actor.ConfiguredInstance> {
+  override defineSchema() { return MyActorSchemaMinion; }
+}
+```
+You distinguish them, not in the DataModel class, but in the Document class to which all of those DataModels belong:
+```typescript
+class MyActor extends Actor {
+  isHero(): this is MyActor & {system: typeof MyActorSchemaHero} {
+	return this.type === "hero";
+  }
+  isVillain(): this is MyActor & {system: typeof MyActorSchemaVillain} {
+    return this.type === "villain";
+  }
+  isMinion(): this is MyActor & {system: typeof MyActorSchemaMinion} {
+    return this.type === "minion";
+  }
+```
+Then, whenever you want TypeScript to know that you're working with, say, a "villain"-type actor, you can use these type assertions to check:
+```typescript
+get evilMonologue(): string {
+  if (this.isVillain()) { return this.system.evilMonologue; }
+  throw new Error(`${this.name} is not a villain and has no evil monologue!`);
+}
+```
