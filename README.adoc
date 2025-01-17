@@ -319,8 +319,8 @@ interface ActorDerivedSchemaHero {
 class ActorDataModelHero extends TypeDataModel<
   typeof ActorSchemaHero,
   Actor.ConfiguredInstance,
-  EmptyObject, <3>
-  ActorDerivedSchemaHero <4>
+  EmptyObject, <1>
+  ActorDerivedSchemaHero <2>
 > {
   override defineSchema() { return ActorSchemaHero; }
 
@@ -332,8 +332,8 @@ class ActorDataModelHero extends TypeDataModel<
   }
 }
 ```
-<3> This third parameter is `EmptyObject`. Don't ask, it just is.
-<4> the fourth parameter is where you tell TypeScript what `system` looks like after `prepareDerivedData`.
+<1> This third parameter is `EmptyObject`. Don't ask, it just is.
+<2> the fourth parameter is where you tell TypeScript what `system` looks like after `prepareDerivedData`.
 
 === 4. Assign Your DataModels to the FVTT-TYPES Configuration
 
