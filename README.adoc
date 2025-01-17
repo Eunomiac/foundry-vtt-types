@@ -289,7 +289,7 @@ class ActorDataModelHero extends TypeDataModel {
 ```
 ### 2. Define Your DataModel Class with Type Parameters
 Now let's add the TypeScript. To tell TypeScript all it needs to know about your Documents, the `TypeDataModel` class has been extended to accept parameters, much like a function, that you pass your type information through:
-```
+```typescript
 class ActorDataModelHero extends TypeDataModel<
   typeof ActorSchemaHero, <1>
   Actor.ConfiguredInstance <2>
@@ -304,7 +304,7 @@ class ActorDataModelHero extends TypeDataModel<
 
 ### 3. Describe Any `prepareDerivedData` Changes
 The `prepareDerivedData` method is often used to augment or modify the `system` data with values that can be easily calculated, rather than storing this data server-side. If you do this, you need to tell TypeScript how the `system` object will look after you've modified it. This is done by passing a simple `interface` as the _fourth_ (not third, see below) parameter to the `TypeDataModel` class:
-```
+```typescript
 interface ActorDerivedSchemaHero {
   attributeModifiers: {
     strength: number,
