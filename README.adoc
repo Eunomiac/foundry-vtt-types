@@ -130,7 +130,7 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
     "noEmit": true,
     "target": "ES2023",
     "outDir": "dist",
-    "types": ["fvtt-types", "jquery", "gsap"], // <1>
+    "types": ["fvtt-types", "jquery", "gsap"], <1>
     "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
@@ -383,12 +383,12 @@ You configure `foundry-vtt-types` to understand and use your documents and data 
 ----
 declare global {
 
-  interface DocumentClassConfig { // <1>
+  interface DocumentClassConfig { <1>
     Actor: typeof MyActor,
     Item: typeof MyItem
   }
 
-  interface DataModelConfig { // <2>
+  interface DataModelConfig { <2>
     Actor: {
       hero: typeof ActorDataHero,
       villain: typeof ActorDataVillain,
