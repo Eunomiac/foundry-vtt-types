@@ -130,7 +130,7 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
     "noEmit": true,
     "target": "ES2023",
     "outDir": "dist",
-    "types": [],
+    "types": ["fvtt-types", "jquery", "gsap"], // <1>
     "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
@@ -142,6 +142,7 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
   }
 }
 ----
+<1> This is where you'll add any additional type definitions you need for your project. `fvtt-types` will need to be here for this library to work; I've included `jquery` and `gsap` as examples.
 
 If you'd like to dig a bit deeper into what each of these settings do, read on:
 
@@ -227,30 +228,52 @@ Setting this to *#true#* makes overrides more explicit, ensuring you never accid
 
 === Installing `foundry-vtt-types`
 
-_(TODO)_
+Installing the `foundry-vtt-types` package is straightforward.  Simply run the following command from the root folder of your project:
+
+[source,console]
+----
+npm add --include=dev fvtt-types@github:League-of-Foundry-Developers/foundry-vtt-types#documents-v2
+----
+You can confirm the installation by verifying that you can access, e.g., `Actor` in the global scope without any errors:
+
+[source,typescript]
+----
+const actorTest = Actor;
+----
 
 == The v12 `DataModel` System
 
 === Schemas
-A "schema" is a description a data object, such as `actor.system`. It describes the keys and the types of values that can be assigned to those keys. In TypeScript, one would generally describe a schema with an `interface`:
-```typescript
+A "schema" is a description of a data object, such as `actor.system`. It describes the keys and the types of values that can be assigned to those keys. In TypeScript, one would generally describe a schema with an `interface`:
+
+[source,typescript]
+----
 interface ActorSchemaHero {
-	attributes: {
-		strength: number,
-		dexterity:  number,
-		constitution:  number
-		intelligence:  number
-		wisdom:  number
-		charisma:  number
-	}
+  attributes: {
+    strength: number,
+    dexterity: number,
+    constitution: number,
+    intelligence: number,
+    wisdom: number,
+    charisma: number
+  }
 }
-```
-But Foundry v12 has introduced a much more powerful and robust way to define the structure of such data: the `DataModel`.
+----
+
+But Foundry has implemented a way to validate data at runtime with DataModels, which requires a little more setup.
 
 === DataModels
-It's beyond the scope of this guide to describe all of the features of this new infrastructure, but there's a great introduction <here>, and you can review the API documentation <here>. You'll learn how to define a `DataModel` for each of your Document types, looking something like this:
-```javascript
-class ActorDataModelHero extends TypeDataModel {
+It's beyond the scope of this guide to describe all of the features of this new infrastructure, but you can learn all about it at the following links:
+
+- link:https://foundryvtt.com/article/system-data-models/[Foundry's DataModel introduction]
+- link:https://foundryvtt.wiki/en/development/api/DataModel[League of Foundry Developers' DataModel guide]
+- link:https://foundryvtt.com/api/classes/foundry.abstract.TypeDataModel.html[Foundry's TypeDataModel API documentation]
+
+You'll learn how to define a `DataModel` for each of your Document types, looking something like this:
+
+[source,javascript]
+----
+class ActorDataHero extends TypeDataModel {
   defineSchema() {
     return {
       attributes: new fields.SchemaField({
@@ -264,12 +287,15 @@ class ActorDataModelHero extends TypeDataModel {
     }
   }
 }
-```
+----
+
 Follow these steps to configure TypeScript to understand your DataModels:
 
 === 1. Define Your Schemas Separately
-In the above example, the schema describing the keys and values of `ActorDataModelHero` is returned directly by the `defineSchema` method. TypeScript needs to know what this looks like in advance, though, so you'll need to define your _schemas_ in advance:
-```javascript
+In the above example, the schema describing the keys and values of `ActorDataHero` is returned directly by the `defineSchema` method. TypeScript needs to know what this looks like in advance, though, so you'll need to define your schemas in advance:
+
+[source,javascript]
+----
 const ActorSchemaHero = {
   attributes: new fields.SchemaField({
 	strength: new fields.NumberField({min: 3, max: 25, initial: 8},
@@ -281,30 +307,39 @@ const ActorSchemaHero = {
   }
 };
 
-class ActorDataModelHero extends TypeDataModel {
+class ActorDataHero extends TypeDataModel {
   defineSchema() {
     return ActorSchemaHero;
   }
 }
-```
+----
+
 ### 2. Define Your DataModel Class with Type Parameters
 Now let's add the TypeScript. To tell TypeScript all it needs to know about your Documents, the `TypeDataModel` class has been extended to accept parameters, much like a function, that you pass your type information through:
-```typescript
-class ActorDataModelHero extends TypeDataModel<
+
+[source,typescript]
+----
+class ActorDataHero extends TypeDataModel<
   typeof ActorSchemaHero, <1>
-  Actor.ConfiguredInstance <2>
+  Actor.Implementation <2>
 > {
   override defineSchema() {
     return ActorSchemaHero;
   }
 }
-```
+----
 <1> a reference to the schema you defined in step 1
 <2> a helper type that points to your project's subclass of `Actor`, which you'll configure in a bit
 
-### 3. Describe Any `prepareDerivedData` Changes
-The `prepareDerivedData` method is often used to augment or modify the `system` data with values that can be easily calculated, rather than storing this data server-side. If you do this, you need to tell TypeScript how the `system` object will look after you've modified it. This is done by passing a simple `interface` as the _fourth_ (not third, see below) parameter to the `TypeDataModel` class:
-```typescript
+### 3. Describe Any `prepareBaseData` and/or `prepareDerivedData` Changes
+The `prepareBaseData` and `prepareDerivedData` methods can be overridden in your Document subclasses to include modifications to the `system` data that are applied at runtime. If you do this, you need to tell TypeScript how the `system` object will look after you've modified it. This is done by passing interfaces describing any new and/or changed `system` properties after each of these methods are called.
+
+(Note: If you don't override these methods, you can skip this step and only pass the first two parameters to `TypeDataModel`.)
+
+[source,typescript]
+----
+import {EmptyObject, InterfaceToObject} from "fvtt-types/utils"; <1>
+
 interface ActorDerivedSchemaHero {
   attributeModifiers: {
     strength: number,
@@ -316,12 +351,13 @@ interface ActorDerivedSchemaHero {
   }
 }
 
-class ActorDataModelHero extends TypeDataModel<
+class ActorDataHero extends TypeDataModel<
   typeof ActorSchemaHero,
-  Actor.ConfiguredInstance,
-  EmptyObject, <1>
-  ActorDerivedSchemaHero <2>
+  Actor.Implementation,
+  EmptyObject, <2>
+  InterfaceToObject<ActorDerivedSchemaHero> <3>
 > {
+
   override defineSchema() { return ActorSchemaHero; }
 
   override prepareDerivedData() {
@@ -330,11 +366,41 @@ class ActorDataModelHero extends TypeDataModel<
       /* ... */
     }
   }
+
 }
-```
-<1> This third parameter is `EmptyObject`. Don't ask, it just is.
-<2> the fourth parameter is where you tell TypeScript what `system` looks like after `prepareDerivedData`.
+----
+<1> You'll need these two helper types to properly define the parameters of `TypeDataModel`.
 
-=== 4. Assign Your DataModels to the FVTT-TYPES Configuration
+- `EmptyObject` basically means "no changes" in this context, and lets you skip the `prepareBaseData` parameter if all you're doing is overriding `prepareDerivedData` (which is generally how you should be doing things).
+- `InterfaceToObject` is a helper type that converts an interface into an object. `TypeDataModel` expects its parameters to be objects, so when you define a schema as an `interface`, you need to convert it to an object with this helper type.
+<2> This parameter contains modifications to the `system` object made by `prepareBaseData`. If you made no modifications, you can pass `EmptyObject` here.
+<3> This parameter contains modifications made by `prepareDerivedData`.
 
-_(TODO)_
+=== 4. Assign Your Document Classes & DataModels to the `foundry-vtt-types` Configuration
+You configure `foundry-vtt-types` to understand and use your documents and data models by merging your classes with two global configuration types supplied by `foundry-vtt-types`:
+
+[source,typescript]
+----
+declare global {
+
+  interface DocumentClassConfig { // <1>
+    Actor: typeof MyActor,
+    Item: typeof MyItem
+  }
+
+  interface DataModelConfig { // <2>
+    Actor: {
+      hero: typeof ActorDataHero,
+      villain: typeof ActorDataVillain,
+      minion: typeof ActorDataMinion
+    },
+    Item: {
+      weapon: typeof ItemDataWeapon,
+      armor: typeof ItemDataArmor,
+      trinket: typeof ItemDataTrinket
+    }
+  }
+}
+----
+<1> `DocumentClassConfig` contains any subclasses of the base Foundry document classes that you are using in your project. You aren't limited to just `Actor` and `Item`; you can include subclasses of any other document types you are using (like `ActiveEffect` or `JournalEntry`).
+<2> `DataModelConfig` describes the type-specific data models you are using for each of your document subclasses. The keys of each object should be the possible values of the `type` property for that document subclass.
