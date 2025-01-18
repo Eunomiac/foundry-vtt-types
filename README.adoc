@@ -32,10 +32,11 @@ If you are new to coding with TypeScript, the *link:https://www.typescriptlang.o
 
 This process can be broadly divided into four steps:
 
-. Configuring your project to use TypeScript.
-. Configuring TypeScript to use `foundry-vtt-types`.
-. Configuring `foundry-vtt-types` to work with your specific project.
-. Configuring Vite to compile your project into a module or system ready for use in Foundry.
+[upperalpha]
+. <<project-setup,Configuring Your Project to Use TypeScript>>
+. <<typescript-config,Configuring TypeScript to Use `foundry-vtt-types`>>
+. <<foundry-config,Configuring `foundry-vtt-types` to Work with Your Specific Project>>
+. <<vite-config,Configuring Vite to Compile Your Project>>
 
 The remainder of this guide will walk you through each of these steps.
 
@@ -43,8 +44,8 @@ The remainder of this guide will walk you through each of these steps.
 ====
 This is a *highly opinionated* guide. It is not intended to provide you with a complete understanding of the many different ways you could set up your TypeScript project, but rather to offer a quick, clear, and convenient recipe that should be more than enough for the majority of use cases.
 ====
-
-== 1. Configuring Your Project to Use TypeScript
+[[project-setup]]
+== A. Configuring Your Project to Use TypeScript
 
 === Initializing Your Project with `npm`
 
@@ -110,7 +111,8 @@ my-typescript-project
 <2> The `static` folder contains project files that don't require any compiling or processing before they are used, such as images, fonts, localization files, Handlebars templates, etc. These files will be copied to the `dist` folder as-is during the build process. _(A few examples have been included, which may or may not be relevant to your project.)_
 <3> Conversely, the `src` folder contains files that need processing before they can be used, such as TypeScript files that must be compiled to JavaScript and SCSS files that must be compiled to CSS.
 
-== 2. Configuring TypeScript to Use `foundry-vtt-types`
+[[typescript-config]]
+== B. Configuring TypeScript to Use `foundry-vtt-types`
 
 === Your `tsconfig.json` File
 
@@ -130,7 +132,7 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
     "noEmit": true,
     "target": "ES2023",
     "outDir": "dist",
-    "types": ["fvtt-types", "jquery", "gsap"], <1>
+    "types": ["fvtt-types"],
     "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
@@ -142,7 +144,11 @@ Create a blank `tsconfig.json` file in your project's root directory, and copy t
   }
 }
 ----
-<1> This is where you'll add any additional type definitions you need for your project. `fvtt-types` will need to be here for this library to work; I've included `jquery` and `gsap` as examples.
+[NOTE]
+.Adding Additional Type Libraries
+====
+The `"types"` array is where you'll add any type libraries you need for your project, in addition to `fvtt-types` (which must be here for this library to function). For example, if you use jQuery in your project, you'll want to add `"jquery"` to this array.
+====
 
 If you'd like to dig a bit deeper into what each of these settings do, read on:
 
@@ -152,55 +158,55 @@ If you'd like to dig a bit deeper into what each of these settings do, read on:
 [horizontal]
 link:https://json.schemastore.org/tsconfig.json[$schema]:: Points to the official JSON Schema definition for TypeScript configuration files. This enables better editor support, including autocompletion and validation of your `tsconfig.json` settings.
 +
-Setting this to *#"https://json.schemastore.org/tsconfig.json"#* helps catch configuration errors and provides inline documentation.
+Setting this to *"https://json.schemastore.org/tsconfig.json"* helps catch configuration errors and provides inline documentation.
 
 link:https://www.typescriptlang.org/tsconfig/#allowImportingTsExtensions[allowImportingTsExtensions]:: Controls whether you can use TypeScript-specific extensions (like `.ts`) in import statements. By default, TypeScript expects you to either omit the extension or use `.js` extensions (e.g., `import "./myFile"` or `import "./myFile.js"`), even when importing from `.ts` files.
 +
-Setting this to *#true#* enables importing with `.ts` extensions. _(This works together with Vite's build process - Vite knows how to handle these TypeScript imports and will ensure they work correctly in the final JavaScript bundle.)_
+Setting this to *true* enables importing with `.ts` extensions. _(This works together with Vite's build process - Vite knows how to handle these TypeScript imports and will ensure they work correctly in the final JavaScript bundle.)_
 
 link:https://www.typescriptlang.org/tsconfig/#esModuleInterop[esModuleInterop]:: Smooths out differences between how different module systems handle imports and exports. By default, TypeScript applies stricter rules that can cause compatibility issues.
 +
-Setting this to *#true#* helps prevent problems when importing libraries. _(While Foundry uses ES Modules, some older libraries you might need could use different formats. This setting helps them work together seamlessly.)_
+Setting this to *true* helps prevent problems when importing libraries. _(While Foundry uses ES Modules, some older libraries you might need could use different formats. This setting helps them work together seamlessly.)_
 
 link:https://www.typescriptlang.org/tsconfig/#allowSyntheticDefaultImports[allowSyntheticDefaultImports]:: Controls whether you can use simplified import syntax for modules that don't explicitly define default exports, which includes many Foundry API features.
 +
-Setting this to *#false#* ensures your imports match Foundry's module structure exactly, preventing subtle runtime errors.
+Setting this to *false* ensures your imports match Foundry's module structure exactly, preventing subtle runtime errors.
 
 link:https://www.typescriptlang.org/tsconfig/#module[module]:: Determines how TypeScript generates JavaScript module code from your source files. By default, TypeScript uses CommonJS style modules.
 +
-Setting this to *#"Node16"#* is necessary for certain internal imports in `foundry-vtt-types` to work. Future updates may change this requirement.
+Setting this to *"Node16"* is necessary for certain internal imports in `foundry-vtt-types` to work. Future updates may change this requirement.
 
 link:https://www.typescriptlang.org/tsconfig/#noEmit[noEmit]:: Controls whether TypeScript should prevent ("no emit") the generation of JavaScript files during compilation.
 +
-Setting this to *#true#* prevents the TypeScript compiler from creating actual JavaScript files when it is run. _(This may seem counterproductive, but as you'll soon see, we'll be using Vite to create the final JavaScript for your project, rather than the TypeScript compiler directly.)_
+Setting this to *true* prevents the TypeScript compiler from creating actual JavaScript files when it is run. _(This may seem counterproductive, but as you'll soon see, we'll be using Vite to create the final JavaScript for your project, rather than the TypeScript compiler directly.)_
 
 link:https://www.typescriptlang.org/tsconfig/#target[target]:: Specifies which JavaScript version your TypeScript code should be converted to. By default, TypeScript targets older versions of JavaScript for maximum compatibility.
 +
-Since Foundy itself uses very modern features, setting this to *#"ES2023"#* aligns with Foundry.
+Since Foundy itself uses very modern features, setting this to *"ES2023"* aligns with Foundry.
 
 link:https://www.typescriptlang.org/tsconfig/#outDir[outDir]:: Specifies where compiled JavaScript files should be placed relative to your source TypeScript files.
 +
-Setting this to *#"dist"#* ensures that your compiled JavaScript is placed in the `dist` folder, which aligns with the file structure described above.
+Setting this to *"dist"* ensures that your compiled JavaScript is placed in the `dist` folder, which aligns with the file structure described above.
 
 link:https://www.typescriptlang.org/tsconfig/#types[types]:: Lists any additional type definition packages that should be included globally in your project. By default, TypeScript automatically includes all `@types` packages it can find in `node_modules`.
 +
-Setting this to an *#empty array#* prevents automatic type inclusion. _(This might seem strange, but we'll be explicitly importing the Foundry types we need, which gives us better control and prevents conflicts between different type definition packages.)_
+Defining values in this array prevents automatic type inclusion except for the type libraries specified here.
 
 link:https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax[verbatimModuleSyntax]:: Controls how TypeScript preserves your module import and export statements. This setting prevents TypeScript from rewriting your import/export syntax.
 +
-Setting this to *#true#* ensures your imports work exactly as written. _(This is particularly important when working with Foundry's module system, as unexpected transformations of import statements can cause hard-to-debug runtime errors.)_
+Setting this to *true* ensures your imports work exactly as written. _(This is particularly important when working with Foundry's module system, as unexpected transformations of import statements can cause hard-to-debug runtime errors.)_
 
 link:https://www.typescriptlang.org/tsconfig/#forceConsistentCasingInFileNames[forceConsistentCasingInFileNames]:: Ensures that casing in imported files must exactly match the actual filename. For example, `import "./MyFile"` won't work if the file is actually named `myfile.ts`.
 +
-Setting this to *#true#* prevents bugs that could occur when your project runs on case-sensitive systems. _(This is especially important if anyone contributing to your project develops on Windows where imports_ are _case insensitive, because your users might be running Foundry on Linux, where `MyFile.ts` and `myfile.ts` are treated as different files.)_
+Setting this to *true* prevents bugs that could occur when your project runs on case-sensitive systems. _(This is especially important if anyone contributing to your project develops on Windows where imports_ are _case insensitive, because your users might be running Foundry on Linux, where `MyFile.ts` and `myfile.ts` are treated as different files.)_
 
 link:https://www.typescriptlang.org/tsconfig/#resolveJsonModule[resolveJsonModule]:: Allows importing JSON files directly for automatic types.
 +
-Setting this to *#true#* enables proper typing for your project's JSON files. _(This is particularly useful for working with your module.json manifest file and any data templates you create, ensuring type safety when accessing their contents.)_
+Setting this to *true* enables proper typing for your project's JSON files. _(This is particularly useful for working with your module.json manifest file and any data templates you create, ensuring type safety when accessing their contents.)_
 
 link:https://www.typescriptlang.org/tsconfig/#strict[strict]:: Enables TypeScript's complete set of strict type checking options. By default, these strict checks are disabled.
 +
-Setting this to *#true#* enables all of the following:
+Setting this to *true* enables all of the following:
 +
 * link:https://www.typescriptlang.org/tsconfig/#noImplicitAny[`noImplicitAny`]: Requires you to explicitly declare your types. By default, TypeScript will infer the `any` type for any variable that doesn't have an explicit type declaration. This is risky because the `any` type bypasses all type checking, potentially leading to runtime errors. Explicit type declarations enhance code safety and maintainability.
 * link:https://www.typescriptlang.org/tsconfig/#strictNullChecks[`strictNullChecks`]: Forces you to handle cases where values might be `null` _(common when working with optional document fields)_
@@ -211,19 +217,19 @@ Setting this to *#true#* enables all of the following:
 
 link:https://www.typescriptlang.org/tsconfig/#noUncheckedIndexedAccess[noUncheckedIndexedAccess]:: Requires you to verify that array elements or dynamic object properties are defined before using them. For some values, there are any number of dynamic keys that could be defined at runtime. For example, because an array of strings could contain any number of strings at runtime, TypeScript will assume that the type of element `stringArray[632]` is always defined and type it as `string`.
 +
-Setting this to *#true#* prevents TypeScript from making this assumption, by resolving the type of `stringArray[632]` to `string | undefined` instead of `string`. This requires you to confirm the element really is defined before you attempt to use it, preventing runtime errors when accessing dynamic Foundry data like `actor.items[32]` which might not always exist.
+Setting this to *true* prevents TypeScript from making this assumption, by resolving the type of `stringArray[632]` to `string | undefined` instead of `string`. This requires you to confirm the element really is defined before you attempt to use it, preventing runtime errors when accessing dynamic Foundry data like `actor.items[32]` which might not always exist.
 
 link:https://www.typescriptlang.org/tsconfig/#noUncheckedSideEffectImports[noUncheckedSideEffectImports]:: Ensures TypeScript validates the path of every import statement. By default, TypeScript validates import paths only when explicit values or types are being imported. This means that while imports like `import { foo } from "./foo/bar"` are checked, imports like `import "./lorem/ipsum"` are not.
 +
-Setting this to *#true#* ensures all imports must exist, improving code reliability.
+Setting this to *true* ensures all imports must exist, improving code reliability.
 
 link:https://www.typescriptlang.org/tsconfig/#useUnknownInCatchVariables[useUnknownInCatchVariables]:: Makes the error parameter of `catch` blocks have type `unknown` instead of `any`, requiring you to verify what kind of error you caught before working with it.
 +
-Setting this to *#true#* prevents you from assuming the error parameter is an instance of `Error` (or any other type). In JavScript, it's possible to throw any value, e.g. `throw "foo bar";` and `throw 1;`. You will need to verify the type of the error before working with it (e.g. `if (error instanceof Error) { ... }`).
+Setting this to *true* prevents you from assuming the error parameter is an instance of `Error` (or any other type). In JavScript, it's possible to throw any value, e.g. `throw "foo bar";` and `throw 1;`. You will need to verify the type of the error before working with it (e.g. `if (error instanceof Error) { ... }`).
 
 link:https://www.typescriptlang.org/tsconfig/#noImplicitOverride[noImplicitOverride]:: Requires explicit marking of methods that override their base class.
 +
-Setting this to *#true#* makes overrides more explicit, ensuring you never accidentally override a base class without realizing it.
+Setting this to *true* makes overrides more explicit, ensuring you never accidentally override a base class without realizing it.
 ====
 
 === Installing `foundry-vtt-types`
@@ -232,7 +238,7 @@ Installing the `foundry-vtt-types` package is straightforward.  Simply run the f
 
 [source,console]
 ----
-npm add --include=dev fvtt-types@github:League-of-Foundry-Developers/foundry-vtt-types#documents-v2
+npm add --include=dev fvtt-types@github:League-of-Foundry-Developers/foundry-vtt-types#main
 ----
 You can confirm the installation by verifying that you can access, e.g., `Actor` in the global scope without any errors:
 
@@ -241,7 +247,8 @@ You can confirm the installation by verifying that you can access, e.g., `Actor`
 const actorTest = Actor;
 ----
 
-== The v12 `DataModel` System
+[[foundry-config]]
+== C. Configuring `foundry-vtt-types` to Work with Your Project
 
 === Schemas
 A "schema" is a description of a data object, such as `actor.system`. It describes the keys and the types of values that can be assigned to those keys. In TypeScript, one would generally describe a schema with an `interface`:
@@ -273,16 +280,19 @@ You'll learn how to define a `DataModel` for each of your Document types, lookin
 
 [source,javascript]
 ----
+import TypeDataModel = foundry.abstract.TypeDataModel;
+import fields = foundry.utils.fields;
+
 class ActorDataHero extends TypeDataModel {
-  defineSchema() {
+  static defineSchema() {
     return {
       attributes: new fields.SchemaField({
-        strength: new fields.NumberField({min: 3, max: 25, initial: 8},
-        dexterity: new fields.NumberField({min: 3, max: 25, initial: 8},
-        constitution: new fields.NumberField({min: 3, max: 25, initial: 8},
-        intelligence: new fields.NumberField({min: 3, max: 25, initial: 8},
-        wisdom: new fields.NumberField({min: 3, max: 25, initial: 8},
-        charisma: new fields.NumberField({min: 3, max: 25, initial: 8}
+        strength: new fields.NumberField({min: 3, max: 25, initial: 8}),
+        dexterity: new fields.NumberField({min: 3, max: 25, initial: 8}),
+        constitution: new fields.NumberField({min: 3, max: 25, initial: 8}),
+        intelligence: new fields.NumberField({min: 3, max: 25, initial: 8}),
+        wisdom: new fields.NumberField({min: 3, max: 25, initial: 8}),
+        charisma: new fields.NumberField({min: 3, max: 25, initial: 8})
       })
     }
   }
@@ -296,19 +306,22 @@ In the above example, the schema describing the keys and values of `ActorDataHer
 
 [source,javascript]
 ----
+import TypeDataModel = foundry.abstract.TypeDataModel;
+import fields = foundry.utils.fields;
+
 const ActorSchemaHero = {
   attributes: new fields.SchemaField({
-	strength: new fields.NumberField({min: 3, max: 25, initial: 8},
-	dexterity: new fields.NumberField({min: 3, max: 25, initial: 8},
-	constitution: new fields.NumberField({min: 3, max: 25, initial: 8},
-	intelligence: new fields.NumberField({min: 3, max: 25, initial: 8},
-	wisdom: new fields.NumberField({min: 3, max: 25, initial: 8},
-	charisma: new fields.NumberField({min: 3, max: 25, initial: 8}
-  }
+    strength: new fields.NumberField({min: 3, max: 25, initial: 8}),
+    dexterity: new fields.NumberField({min: 3, max: 25, initial: 8}),
+    constitution: new fields.NumberField({min: 3, max: 25, initial: 8}),
+    intelligence: new fields.NumberField({min: 3, max: 25, initial: 8}),
+    wisdom: new fields.NumberField({min: 3, max: 25, initial: 8}),
+    charisma: new fields.NumberField({min: 3, max: 25, initial: 8})
+  })
 };
 
 class ActorDataHero extends TypeDataModel {
-  defineSchema() {
+  static defineSchema() {
     return ActorSchemaHero;
   }
 }
@@ -319,14 +332,17 @@ Now let's add the TypeScript. To tell TypeScript all it needs to know about your
 
 [source,typescript]
 ----
+import TypeDataModel = foundry.abstract.TypeDataModel;
+
 class ActorDataHero extends TypeDataModel<
-  typeof ActorSchemaHero, <1>
-  Actor.Implementation <2>
+  typeof ActorSchemaHero, // <1>
+  Actor.Implementation // <2>
 > {
-  override defineSchema() {
+  static override defineSchema() {
     return ActorSchemaHero;
   }
 }
+
 ----
 <1> a reference to the schema you defined in step 1
 <2> a helper type that points to your project's subclass of `Actor`, which you'll configure in a bit
@@ -338,35 +354,36 @@ The `prepareBaseData` and `prepareDerivedData` methods can be overridden in your
 
 [source,typescript]
 ----
-import {EmptyObject, InterfaceToObject} from "fvtt-types/utils"; <1>
+import TypeDataModel = foundry.abstract.TypeDataModel;
+import {type EmptyObject, type InterfaceToObject} from "fvtt-types/utils"; // <1>
 
 interface ActorDerivedSchemaHero {
   attributeModifiers: {
-    strength: number,
-    dexterity: number,
-    constitution: number,
-    intelligence: number,
-    wisdom: number,
-    charisma: number
-  }
+    strength: number;
+    dexterity: number;
+    constitution: number;
+    intelligence: number;
+    wisdom: number;
+    charisma: number;
+  };
 }
 
 class ActorDataHero extends TypeDataModel<
   typeof ActorSchemaHero,
   Actor.Implementation,
-  EmptyObject, <2>
-  InterfaceToObject<ActorDerivedSchemaHero> <3>
+  EmptyObject,                                  // <2>
+  InterfaceToObject<ActorDerivedSchemaHero>     // <3>
 > {
-
-  override defineSchema() { return ActorSchemaHero; }
+  static override defineSchema() {
+    return ActorSchemaHero;
+  }
 
   override prepareDerivedData() {
     this.attributeModifiers = {
-	  strength: Math.floor((this.attributes.strength - 10) / 2)
+      strength: Math.floor((this.attributes.strength - 10) / 2),
       /* ... */
-    }
+    };
   }
-
 }
 ----
 <1> You'll need these two helper types to properly define the parameters of `TypeDataModel`.
@@ -404,3 +421,7 @@ declare global {
 ----
 <1> `DocumentClassConfig` contains any subclasses of the base Foundry document classes that you are using in your project. You aren't limited to just `Actor` and `Item`; you can include subclasses of any other document types you are using (like `ActiveEffect` or `JournalEntry`).
 <2> `DataModelConfig` describes the type-specific data models you are using for each of your document subclasses. The keys of each object should be the possible values of the `type` property for that document subclass.
+
+[[vite-config]]
+== D. Configuring Vite to Compile Your Project
+(TODO)
