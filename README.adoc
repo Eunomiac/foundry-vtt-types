@@ -300,7 +300,7 @@ class ActorDataModelHero extends TypeDataModel<
 }
 ```
 <1> a reference to the schema you defined in step 1
-<2> a helper type that points to whatever Actor subclass you configured Foundry to use via (??? quick check of that step ???)
+<2> a helper type that points to your project's subclass of `Actor`, which you'll configure in a bit
 
 ### 3. Describe Any `prepareDerivedData` Changes
 The `prepareDerivedData` method is often used to augment or modify the `system` data with values that can be easily calculated, rather than storing this data server-side. If you do this, you need to tell TypeScript how the `system` object will look after you've modified it. This is done by passing a simple `interface` as the _fourth_ (not third, see below) parameter to the `TypeDataModel` class:
@@ -338,39 +338,3 @@ class ActorDataModelHero extends TypeDataModel<
 === 4. Assign Your DataModels to the FVTT-TYPES Configuration
 
 _(TODO)_
-
-== Type-Specific DataModels
-The next step is to make sure TypeScript can differentiate between the types of your Documents, since each Document `type` can have its own unique schema.  The easiest way to do this is by creating a simple type assertion method for each of your types in your main Document class.
-
-For example, say your `MyActor` class could have one of three different values for `type`: "hero", "villain" or "minion". You will have already created a different DataModel for each type:
-```typescript
-class MyActorDataModelHero extends TypeDataModel<typeof MyActorSchemaHero, Actor.ConfiguredInstance> {
-  override defineSchema() { return MyActorSchemaHero; }
-}
-class MyActorDataModelVillain extends TypeDataModel<typeof MyActorSchemaVillain, Actor.ConfiguredInstance> {
-  override defineSchema() { return MyActorSchemaVillain; }
-}
-class MyActorDataModelMinion extends TypeDataModel<typeof MyActorSchemaMinion, Actor.ConfiguredInstance> {
-  override defineSchema() { return MyActorSchemaMinion; }
-}
-```
-You distinguish them, not in the DataModel class, but in the Document class to which all of those DataModels belong:
-```typescript
-class MyActor extends Actor {
-  isHero(): this is MyActor & {system: typeof MyActorSchemaHero} {
-	return this.type === "hero";
-  }
-  isVillain(): this is MyActor & {system: typeof MyActorSchemaVillain} {
-    return this.type === "villain";
-  }
-  isMinion(): this is MyActor & {system: typeof MyActorSchemaMinion} {
-    return this.type === "minion";
-  }
-```
-Then, whenever you want TypeScript to know that you're working with, say, a "villain"-type actor, you can use these type assertions to check:
-```typescript
-get evilMonologue(): string {
-  if (this.isVillain()) { return this.system.evilMonologue; }
-  throw new Error(`${this.name} is not a villain and has no evil monologue!`);
-}
-```
