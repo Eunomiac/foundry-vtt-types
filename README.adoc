@@ -348,7 +348,7 @@ class ActorDataHero extends TypeDataModel<
 <2> a helper type that points to your project's subclass of `Actor`, which you'll configure in a bit
 
 ### 3. Describe Any `prepareBaseData` and/or `prepareDerivedData` Changes
-The `prepareBaseData` and `prepareDerivedData` methods can be overridden in your Document subclasses to include modifications to the `system` data that are applied at runtime. If you do this, you need to tell TypeScript how the `system` object will look after you've modified it. This is done by passing interfaces describing any new and/or changed `system` properties after each of these methods are called.
+The `prepareBaseData` and `prepareDerivedData` methods can be overridden in your `TypeDataModel` subclasses to include modifications to the `system` data that are applied at runtime. If you do this, you need to tell TypeScript how the `system` object will look after you've modified it. This is done by passing interfaces describing any new and/or changed `system` properties after each of these methods are called.
 
 [NOTE]
 ====
