@@ -358,7 +358,7 @@ If you don't override these methods, you can skip this step and only pass the fi
 [source,typescript]
 ----
 import TypeDataModel = foundry.abstract.TypeDataModel;
-import {type EmptyObject, type InterfaceToObject} from "fvtt-types/utils"; // <1>
+import { type EmptyObject, type InterfaceToObject } from "fvtt-types/utils"; // <1>
 
 interface ActorDerivedSchemaHero {
   attributeModifiers: {
