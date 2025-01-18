@@ -46,6 +46,7 @@ This is a *highly opinionated* guide. It is not intended to provide you with a c
 ====
 [[project-setup]]
 == A. Configuring Your Project to Use TypeScript
+This guide assumes you are using link:https://nodejs.org/en/download/package-manager[Node.js] and its package manager `npm` to manage your project. If you don't already have Node.js installed, download and install it from the provided link.
 
 === Initializing Your Project with `npm`
 
@@ -63,8 +64,7 @@ This command will guide you through creating a `package.json` file. You can acce
 
 TypeScript is a language that compiles into JavaScript. This means before Foundry VTT can execute it must be compiled into plain JavaScript.
 
-To get started, you'll need to install the TypeScript compiler.
-The easiest way to do this is via link:https://nodejs.org/en/download/package-manager[Node.js] and its package manager, `npm`. If you don't already have Node.js installed, download and install it from the provided link. Then, open your terminal and run the following command:
+To get started, you'll need to install the TypeScript compiler. Open your terminal and run the following command from the root folder of your project:
 
 [source,console]
 ----
