@@ -335,8 +335,8 @@ Now let's add the TypeScript. To tell TypeScript all it needs to know about your
 import TypeDataModel = foundry.abstract.TypeDataModel;
 
 class ActorDataHero extends TypeDataModel<
-  typeof ActorSchemaHero, // <1>
-  Actor.Implementation // <2>
+  typeof ActorSchemaHero,     // <1>
+  Actor.Implementation        // <2>
 > {
   static override defineSchema() {
     return ActorSchemaHero;
@@ -350,7 +350,10 @@ class ActorDataHero extends TypeDataModel<
 ### 3. Describe Any `prepareBaseData` and/or `prepareDerivedData` Changes
 The `prepareBaseData` and `prepareDerivedData` methods can be overridden in your Document subclasses to include modifications to the `system` data that are applied at runtime. If you do this, you need to tell TypeScript how the `system` object will look after you've modified it. This is done by passing interfaces describing any new and/or changed `system` properties after each of these methods are called.
 
-(Note: If you don't override these methods, you can skip this step and only pass the first two parameters to `TypeDataModel`.)
+[NOTE]
+====
+If you don't override these methods, you can skip this step and only pass the first two parameters to `TypeDataModel`.
+====
 
 [source,typescript]
 ----
@@ -400,12 +403,12 @@ You configure `foundry-vtt-types` to understand and use your documents and data 
 ----
 declare global {
 
-  interface DocumentClassConfig { <1>
+  interface DocumentClassConfig {    // <1>
     Actor: typeof MyActor,
     Item: typeof MyItem
   }
 
-  interface DataModelConfig { <2>
+  interface DataModelConfig {        // <2>
     Actor: {
       hero: typeof ActorDataHero,
       villain: typeof ActorDataVillain,
